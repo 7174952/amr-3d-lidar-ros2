@@ -51,6 +51,8 @@
   <exec_depend>PCL</exec_depend>
   <exec_depend>GTSAM</exec_depend>
   <exec_depend>Eigen</exec_depend>
+
+  <depend>livox_ros_driver2</depend>
   
   <member_of_group>rosidl_interface_packages</member_of_group>
 

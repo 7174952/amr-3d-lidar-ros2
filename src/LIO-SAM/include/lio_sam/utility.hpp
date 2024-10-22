@@ -57,6 +57,7 @@
 #include <array>
 #include <thread>
 #include <mutex>
+#include "livox_ros_driver2/msg/custom_msg.hpp"
 
 using namespace std;
 
@@ -100,6 +101,7 @@ public:
     float lidarMaxRange;
 
     // IMU
+    int   imuType;
     float imuAccNoise;
     float imuGyrNoise;
     float imuAccBiasN;
@@ -208,7 +210,8 @@ public:
                 "Invalid sensor type (must be either 'velodyne' or 'ouster' or 'livox'): " << sensorStr);
             rclcpp::shutdown();
         }
-
+        declare_parameter("imuType", 0);
+        get_parameter("imuType", imuType);
         declare_parameter("N_SCAN", 64);
         get_parameter("N_SCAN", N_SCAN);
         declare_parameter("Horizon_SCAN", 512);
@@ -316,6 +319,10 @@ public:
         sensor_msgs::msg::Imu imu_out = imu_in;
         // rotate acceleration
         Eigen::Vector3d acc(imu_in.linear_acceleration.x, imu_in.linear_acceleration.y, imu_in.linear_acceleration.z);
+        //livox 内置的六轴imu的加速度单位是g 这里要还原到m/s^2
+        if(imuType == 0)
+            acc *= imuGravity;
+
         acc = extRot * acc;
         imu_out.linear_acceleration.x = acc.x();
         imu_out.linear_acceleration.y = acc.y();
@@ -328,7 +335,21 @@ public:
         imu_out.angular_velocity.z = gyr.z();
         // rotate roll pitch yaw
         Eigen::Quaterniond q_from(imu_in.orientation.w, imu_in.orientation.x, imu_in.orientation.y, imu_in.orientation.z);
-        Eigen::Quaterniond q_final = q_from * extQRPY;
+        Eigen::Quaterniond q_final;
+
+        if (imuType == 0)
+        {
+            q_final = extQRPY;
+        }
+        else if (imuType == 1)
+        {
+            q_final = q_from * extQRPY;
+        }
+        else
+            std::cout << "pls set your imu_type, 0 for 6axis and 1 for 9axis" << std::endl;
+
+        q_final.normalize();
+
         imu_out.orientation.x = q_final.x();
         imu_out.orientation.y = q_final.y();
         imu_out.orientation.z = q_final.z();

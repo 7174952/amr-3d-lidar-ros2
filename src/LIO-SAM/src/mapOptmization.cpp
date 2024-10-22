@@ -90,6 +90,8 @@ public:
 
     pcl::PointCloud<PointType>::Ptr laserCloudCornerLast; // corner feature set from odoOptimization
     pcl::PointCloud<PointType>::Ptr laserCloudSurfLast; // surf feature set from odoOptimization
+    pcl::PointCloud<PointType>::Ptr laserCloudCornerLast1; // corner feature set from odoOptimization
+    pcl::PointCloud<PointType>::Ptr laserCloudSurfLast1; // surf feature set from odoOptimization
     pcl::PointCloud<PointType>::Ptr laserCloudCornerLastDS; // downsampled corner feature set from odoOptimization
     pcl::PointCloud<PointType>::Ptr laserCloudSurfLastDS; // downsampled surf feature set from odoOptimization
 
@@ -264,6 +266,8 @@ public:
 
         laserCloudCornerLast.reset(new pcl::PointCloud<PointType>()); // corner feature set from odoOptimization
         laserCloudSurfLast.reset(new pcl::PointCloud<PointType>()); // surf feature set from odoOptimization
+        laserCloudCornerLast1.reset(new pcl::PointCloud<PointType>()); // corner feature set from odoOptimization
+        laserCloudSurfLast1.reset(new pcl::PointCloud<PointType>()); // surf feature set from odoOptimization
         laserCloudCornerLastDS.reset(new pcl::PointCloud<PointType>()); // downsampled corner featuer set from odoOptimization
         laserCloudSurfLastDS.reset(new pcl::PointCloud<PointType>()); // downsampled surf featuer set from odoOptimization
 
@@ -353,6 +357,25 @@ public:
 
         Eigen::Affine3f transCur = pcl::getTransformation(transformIn->x, transformIn->y, transformIn->z, transformIn->roll, transformIn->pitch, transformIn->yaw);
         
+        #pragma omp parallel for num_threads(numberOfCores)
+        for (int i = 0; i < cloudSize; ++i)
+        {
+            const auto &pointFrom = cloudIn->points[i];
+            cloudOut->points[i].x = transCur(0,0) * pointFrom.x + transCur(0,1) * pointFrom.y + transCur(0,2) * pointFrom.z + transCur(0,3);
+            cloudOut->points[i].y = transCur(1,0) * pointFrom.x + transCur(1,1) * pointFrom.y + transCur(1,2) * pointFrom.z + transCur(1,3);
+            cloudOut->points[i].z = transCur(2,0) * pointFrom.x + transCur(2,1) * pointFrom.y + transCur(2,2) * pointFrom.z + transCur(2,3);
+            cloudOut->points[i].intensity = pointFrom.intensity;
+        }
+        return cloudOut;
+    }
+
+    pcl::PointCloud<PointType>::Ptr transformPointCloud(pcl::PointCloud<PointType>::Ptr cloudIn,  Eigen::Affine3f transCur)
+    {
+        pcl::PointCloud<PointType>::Ptr cloudOut(new pcl::PointCloud<PointType>());
+
+        int cloudSize = cloudIn->size();
+        cloudOut->resize(cloudSize);
+
         #pragma omp parallel for num_threads(numberOfCores)
         for (int i = 0; i < cloudSize; ++i)
         {
@@ -1296,6 +1319,8 @@ public:
             {
                 laserCloudOri->clear();
                 coeffSel->clear();
+                std::fill(laserCloudOriCornerFlag.begin(), laserCloudOriCornerFlag.end(), false);
+                std::fill(laserCloudOriSurfFlag.begin(), laserCloudOriSurfFlag.end(), false);
 
                 cornerOptimization();
                 surfOptimization();
@@ -1309,6 +1334,35 @@ public:
             transformUpdate();
         } else {
             RCLCPP_WARN(get_logger(), "Not enough features! Only %d edge and %d planar features available.", laserCloudCornerLastDSNum, laserCloudSurfLastDSNum);
+        }
+    }
+
+    void scan2MapOptimization2()
+    {
+        if (cloudKeyPoses3D->points.empty())
+            return;
+
+        if (laserCloudCornerLastDSNum > edgeFeatureMinValidNum && laserCloudSurfLastDSNum > surfFeatureMinValidNum)
+        {
+            kdtreeCornerFromMap->setInputCloud(laserCloudCornerFromMapDS);
+            kdtreeSurfFromMap->setInputCloud(laserCloudSurfFromMapDS);
+
+            for (int iterCount = 0; iterCount < 3; iterCount++)
+            {
+                laserCloudOri->clear();
+                coeffSel->clear();
+
+                cornerOptimization();
+                surfOptimization();
+
+                combineOptimizationCoeffs();
+
+                if (LMOptimization(iterCount) == true)
+                    break;
+            }
+        } else {
+            RCLCPP_WARN(get_logger(), "Not enough features! Only %d edge and %d planar features available.", laserCloudCornerLastDSNum, laserCloudSurfLastDSNum);
+
         }
     }
 
