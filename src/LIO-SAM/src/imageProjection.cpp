@@ -56,10 +56,8 @@ private:
     std::mutex imuLock;
     std::mutex odoLock;
 
-//    rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr subLaserCloud;
     rclcpp::Subscription<livox_ros_driver2::msg::CustomMsg>::SharedPtr subLaserCloud;
     rclcpp::CallbackGroup::SharedPtr callbackGroupLidar;
-//    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pubLaserCloud;
     rclcpp::Publisher<livox_ros_driver2::msg::CustomMsg>::SharedPtr pubLaserCloud;
 
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pubExtractedCloud;
@@ -185,6 +183,8 @@ public:
             imuRotY[i] = 0;
             imuRotZ[i] = 0;
         }
+
+        columnIdnCountVec.assign(N_SCAN, 0);
     }
 
     ~ImageProjection(){}
