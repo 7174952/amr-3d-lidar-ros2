@@ -5,5 +5,4 @@ mikuni amr for ros2 by 3d lidar sensor
 - add livox driver2
 - add oriental motor driver
 - add lio-sam package without mid-360/GPS function: eigen v3.3.7, gtsam v4.2 shoud be setup first
-                                
-  
+                                 
