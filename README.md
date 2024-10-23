@@ -1,5 +1,5 @@
 # amr-3d-lidar-ros2
-mikuni amr for ros2 by 3d lidar sensor
+mikuni amr for ubuntu 24.04 lts ros2 jazzy by 3d lidar sensor
 
 #2024/10/22 1st init
 - add livox driver2
