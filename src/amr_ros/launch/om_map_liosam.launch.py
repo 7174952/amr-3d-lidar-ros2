@@ -63,6 +63,6 @@ def generate_launch_description():
         ),
         slam_toolbox_launch,
         lio_sam_launch,
-        # livox_driver2_launch
+        livox_driver2_launch
 
     ])
