@@ -9,13 +9,13 @@ def generate_launch_description():
     return LaunchDescription(
         [
             DeclareLaunchArgument("com", default_value="/dev/ttyUSB0"),
-            DeclareLaunchArgument("topicID", default_value="0"),
+            DeclareLaunchArgument("topicID", default_value="1"),
             DeclareLaunchArgument("baudrate", default_value="9600"),
             DeclareLaunchArgument("updateRate", default_value="100"),
             DeclareLaunchArgument("firstGen", default_value=""),
-            DeclareLaunchArgument("secondGen", default_value=""),
-            DeclareLaunchArgument("globalID", default_value="-1"),
-            DeclareLaunchArgument("axisNum", default_value="1"),
+            DeclareLaunchArgument("secondGen", default_value="1,2,"),
+            DeclareLaunchArgument("globalID", default_value="15"),
+            DeclareLaunchArgument("axisNum", default_value="2"),
             Node(
                 package="om_modbus_master",
                 executable="om_modbusRTU_node",
