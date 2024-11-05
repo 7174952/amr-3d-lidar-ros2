@@ -21,7 +21,7 @@ def generate_launch_description():
             os.path.join(
                 get_package_share_directory('lio_sam'),  # 这里替换成包含子launch文件的包名
                 'launch',
-                'run6axis.launch.py'
+                'run.launch.py'
             )
         )
     )
@@ -44,6 +44,8 @@ def generate_launch_description():
         ]),
     )
     return LaunchDescription([
+        lio_sam_launch,
+        slam_toolbox_launch,
         Node(
             package='pointcloud_to_laserscan',
             executable='pointcloud_to_laserscan_node',
@@ -51,18 +53,6 @@ def generate_launch_description():
             remappings=[('cloud_in', '/lio_sam/deskew/cloud_deskewed')],
             parameters=[pointcloud_to_scan_param_file_path]
         ),
-        Node(
-            package='tf2_ros',
-            executable='static_transform_publisher',
-            name='static_transform_publisher',
-            arguments=[
-                '--x', '0', '--y', '0', '--z', '0',
-                '--qx', '0', '--qy', '0', '--qz', '0', '--qw', '1',
-                '--frame-id', 'map', '--child-frame-id', 'odom'
-            ]
-        ),
-        slam_toolbox_launch,
-        lio_sam_launch,
         livox_driver2_launch
 
     ])
