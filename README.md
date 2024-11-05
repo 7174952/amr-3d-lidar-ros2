@@ -11,7 +11,7 @@ mikuni amr for ubuntu 24.04 lts, ros2 jazzy by 3d lidar sensor
 
 -地図生成コマンド流れ(ターミナル)：
 
-  １）$ ros2 launch amr_ros om_map_liosam_3D.launch.py
+  １) $ ros2 launch amr_ros om_map_liosam_3D.launch.py
   
   2) $ ros2 launch amr_ros om_map_liosam_2D.launch.py
      
