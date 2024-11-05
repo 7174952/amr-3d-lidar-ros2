@@ -1,5 +1,5 @@
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import TimerAction, IncludeLaunchDescription
 from launch_ros.actions import Node
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 import os
@@ -16,43 +16,62 @@ def generate_launch_description():
         'params_point_livox_liosam.yaml'
     )
     # 引用子launch文件
-    lio_sam_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(
-                get_package_share_directory('lio_sam'),  # 这里替换成包含子launch文件的包名
-                'launch',
-                'run.launch.py'
-            )
-        )
-    )
     livox_driver2_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(
                 get_package_share_directory('livox_ros_driver2'),  # 这里替换成包含子launch文件的包名
                 'launch_ROS2',
-                'msg_MID360_launch.py'
+                'rviz_MID360_launch.py'
             )
         )
     )
-    slam_toolbox_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([
-            os.path.join(
-                get_package_share_directory('amr_ros'),
-                'launch/include',
-                'slam_toolbox.launch.py'
-            )
-        ]),
-    )
-    return LaunchDescription([
-        lio_sam_launch,
-        slam_toolbox_launch,
-        Node(
-            package='pointcloud_to_laserscan',
-            executable='pointcloud_to_laserscan_node',
-            name='pointcloud_to_laserscan',
-            remappings=[('cloud_in', '/lio_sam/deskew/cloud_deskewed')],
-            parameters=[pointcloud_to_scan_param_file_path]
-        ),
-        livox_driver2_launch
 
+    lio_sam_launch = TimerAction(
+        period=10.0,  # 延时5秒
+        actions=[
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    os.path.join(
+                        get_package_share_directory('lio_sam'),  # 这里替换成包含子launch文件的包名
+                        'launch',
+                        'run.launch.py'
+                    )
+                )
+            )
+        ]
+    )
+
+    pointcloud_to_scan_node = TimerAction(
+        period=5.0,  # 延时5秒
+        actions=[
+            Node(
+                package='pointcloud_to_laserscan',
+                executable='pointcloud_to_laserscan_node',
+                name='pointcloud_to_laserscan',
+                remappings=[('cloud_in', '/lio_sam/deskew/cloud_deskewed')],
+                parameters=[pointcloud_to_scan_param_file_path]
+            )
+        ]
+    )
+
+    slam_toolbox_launch = TimerAction(
+        period=5.0,  # 延时5秒
+        actions=[
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    os.path.join(
+                        get_package_share_directory('amr_ros'),  # 这里替换成包含子launch文件的包名
+                        'launch/include',
+                        'slam_toolbox.launch.py'
+                    )
+                )
+            )
+        ]
+    )
+
+    return LaunchDescription([
+        livox_driver2_launch,
+        lio_sam_launch,
+        pointcloud_to_scan_node,
+        slam_toolbox_launch
     ])
