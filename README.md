@@ -8,6 +8,14 @@ mikuni amr for ubuntu 24.04 lts, ros2 jazzy by 3d lidar sensor
 -3d地図生成：lio-samパッケージの３d点群地図不具合修正
 
 -2d地図：slam_toolboxパッケージでlaunchファイルを追加
+
+-地図生成コマンド流れ(ターミナル)：
+
+  １）$ ros2 launch amr_ros om_map_liosam_3D.launch.py
+  
+  2) $ ros2 launch amr_ros om_map_liosam_2D.launch.py
+     
+  4) $ ros2 launch amr_ros om_manual.launch.py
                       
 #2024/10/29
 - slam_toolboxパッケージインストール：$ sudo apt install ros-jazzy-slam-toolbox
