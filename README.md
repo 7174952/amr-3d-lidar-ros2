@@ -18,7 +18,9 @@ mikuni amr for ubuntu 24.04 lts, ros2 jazzy by 3d lidar sensor
   4) $ ros2 launch amr_ros om_manual.launch.py
      
 　注意：Livox_SDK2のソースコードはビルとする際に下記の修正必要：
+ 
  　・sdk_core/comm/define.h >>追加：#include <cstdint>
+  
    ・sdk_core/logger_handler/file_manager.h >>追加：#include <cstdint>　
 
 #2024/10/29
