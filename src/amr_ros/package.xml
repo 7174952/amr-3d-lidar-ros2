@@ -8,6 +8,15 @@
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <!-- 添加 Qt 依赖 -->
+  <build_depend>Qt5Widgets</build_depend>
+  <build_depend>Qt5Multimedia</build_depend>
+  <!-- 添加 OpenCV 依赖 -->
+  <build_depend>opencv</build_depend>
+
+  <exec_depend>Qt5Widgets</exec_depend>
+  <exec_depend>Qt5Multimedia</exec_depend>
+  <exec_depend>opencv</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

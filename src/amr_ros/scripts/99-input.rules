@@ -1,0 +1,13 @@
+# Joystick
+SUBSYSTEM=="input", KERNEL=="js[0-9]*", ATTRS{name}=="Microsoft X-Box 360 pad", \
+  SYMLINK+="input/js-joystick"
+
+# TouchScreen
+SUBSYSTEM=="input", KERNEL=="js[0-9]*", ATTRS{name}=="TSTP MTouch Mouse", \
+  SYMLINK+="input/js-touchscreen"
+
+# IMU
+SUBSYSTEM=="tty", ATTRS{idVendor}=="2b72", ATTRS{idProduct}=="0003", SYMLINK+="ttyACM-imu"
+
+# GNSS
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1546", ATTRS{idProduct}=="01a9", SYMLINK+="ttyACM-gnss"
