@@ -432,7 +432,7 @@ void RosMessage::queryCallback(const om_msgs::msg::Query::SharedPtr msg) {
       state_msg_.state_mes = STATE_MES_ERROR;
     }
   } else if (true == isCommEnabled_) {
-    RCLCPP_INFO(node_->get_logger(), "Driver is busy");
+    // RCLCPP_INFO(node_->get_logger(), "Driver is busy");
   }
 }
 
