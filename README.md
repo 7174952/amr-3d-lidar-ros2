@@ -1,3 +1,9 @@
+#2025/3/18 robot_gui画面操作追加、Liosam地図生成機能更新
+--------------------------------------------------------------------
+1.MainWindow、MakeMap、MakeRoute GUI追加
+
+2.liosamのframe＿id更新、パラメータ更新、地図不安定不具合修正
+
 # amr-3d-lidar-ros2
 mikuni amr for ubuntu 24.04 lts, ros2 jazzy by 3d lidar sensor
 
