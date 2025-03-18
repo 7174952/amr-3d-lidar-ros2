@@ -87,41 +87,19 @@ public:
     void calculateSmoothness()
     {
         int cloudSize = extractedCloud->points.size();
-        int diffRangeStartIdx = 5;
-        switch (sensor) {
-          case SensorType::MID360:
-            diffRangeStartIdx = 2;
-            break;
-          case SensorType::VELODYNE:
-          case SensorType::OUSTER:
-          case SensorType::LIVOX:
-            diffRangeStartIdx = 5;
-            break;
-        }
-
-        for (int i = diffRangeStartIdx; i < cloudSize - diffRangeStartIdx; i++)
-        {   
-            float diffRange = 0.0;
-
-            switch (sensor) {
-                case SensorType::MID360:
-                    diffRange = cloudInfo.point_range[i-2] + cloudInfo.point_range[i-1] 
-                                - cloudInfo.point_range[i] * 4
-                                + cloudInfo.point_range[i+1] + cloudInfo.point_range[i+2];
-                    break;
-
-                case SensorType::VELODYNE:
-                case SensorType::OUSTER:
-                case SensorType::LIVOX:
-                    diffRange = cloudInfo.point_range[i-5] + cloudInfo.point_range[i-4]
-                                + cloudInfo.point_range[i-3] + cloudInfo.point_range[i-2]
-                                + cloudInfo.point_range[i-1] - cloudInfo.point_range[i] * 4
-                                + cloudInfo.point_range[i+1] + cloudInfo.point_range[i+2]
-                                + cloudInfo.point_range[i+3] + cloudInfo.point_range[i+4]
-                                + cloudInfo.point_range[i+5];
-                    break;
-            }
-
+        for (int i = 5; i < cloudSize - 5; i++)
+        {
+#if 0 //debug_ryu
+            float diffRange = cloudInfo.point_range[i-5] + cloudInfo.point_range[i-4]
+                            + cloudInfo.point_range[i-3] + cloudInfo.point_range[i-2]
+                            + cloudInfo.point_range[i-1] - cloudInfo.point_range[i] * 10
+                            + cloudInfo.point_range[i+1] + cloudInfo.point_range[i+2]
+                            + cloudInfo.point_range[i+3] + cloudInfo.point_range[i+4]
+                            + cloudInfo.point_range[i+5];
+#endif
+            float diffRange =
+                            cloudInfo.point_range[i-2]  + cloudInfo.point_range[i-1] - cloudInfo.point_range[i] * 4
+                            + cloudInfo.point_range[i+1] + cloudInfo.point_range[i+2];
 
             cloudCurvature[i] = diffRange*diffRange;//diffX * diffX + diffY * diffY + diffZ * diffZ;
 
@@ -144,40 +122,25 @@ public:
             float depth2 = cloudInfo.point_range[i+1];
             int columnDiff = std::abs(int(cloudInfo.point_col_ind[i+1] - cloudInfo.point_col_ind[i]));
             if (columnDiff < 10){
-
-                switch (sensor) 
-                {
-                    case SensorType::VELODYNE:
-                    case SensorType::OUSTER:
-                    case SensorType::LIVOX:
-                        // 10 pixel diff in range image
-                        if (depth1 - depth2 > 0.3){
-                            cloudNeighborPicked[i - 5] = 1;
-                            cloudNeighborPicked[i - 4] = 1;
-                            cloudNeighborPicked[i - 3] = 1;
-                            cloudNeighborPicked[i - 2] = 1;
-                            cloudNeighborPicked[i - 1] = 1;
-                            cloudNeighborPicked[i] = 1;
-                        }else if (depth2 - depth1 > 0.3){
-                            cloudNeighborPicked[i + 1] = 1;
-                            cloudNeighborPicked[i + 2] = 1;
-                            cloudNeighborPicked[i + 3] = 1;
-                            cloudNeighborPicked[i + 4] = 1;
-                            cloudNeighborPicked[i + 5] = 1;
-                            cloudNeighborPicked[i + 6] = 1;
-                        }
-                        break;
-
-                    case SensorType::MID360:
-                        // 5 pixel diff in range image
-                        if (depth1 - depth2 > 0.3){
-                            cloudNeighborPicked[i - 1] = 1;
-                            cloudNeighborPicked[i] = 1;
-                        }else if (depth2 - depth1 > 0.3){
-                            cloudNeighborPicked[i + 1] = 1;
-                            cloudNeighborPicked[i + 2] = 1;
-                        }
-                        break;
+                // 10 pixel diff in range image
+                if (depth1 - depth2 > 0.3){
+#if 0 //debug_ryu
+                    cloudNeighborPicked[i - 5] = 1;
+                    cloudNeighborPicked[i - 4] = 1;
+                    cloudNeighborPicked[i - 3] = 1;
+                    cloudNeighborPicked[i - 2] = 1;
+#endif
+                    cloudNeighborPicked[i - 1] = 1;
+                    cloudNeighborPicked[i] = 1;
+                }else if (depth2 - depth1 > 0.3){
+                    cloudNeighborPicked[i + 1] = 1;
+                    cloudNeighborPicked[i + 2] = 1;
+#if 0 //debug_ryu
+                    cloudNeighborPicked[i + 3] = 1;
+                    cloudNeighborPicked[i + 4] = 1;
+                    cloudNeighborPicked[i + 5] = 1;
+                    cloudNeighborPicked[i + 6] = 1;
+#endif
                 }
             }
             // parallel beam
