@@ -35,6 +35,7 @@ geometry_msgs::msg::TwistStamped msg_velocity;
 int gState_driver = 0;  /* Communication flag (0: available, 1: busy) */
 
 Om_data om_data;
+bool gear_ratio_above_20_1;
 
 rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr cart_velocity_pub;
 rclcpp::Publisher<om_msgs::msg::Query>::SharedPtr om_query_pub;
@@ -267,6 +268,7 @@ void update()
                 {
                     cmd_info.data[i] = msg.data[i];
                 }
+                cmd_info.set_speed.vel_line = (gear_ratio_above_20_1 == true) ? (-1*cmd_info.set_speed.vel_line) : cmd_info.set_speed.vel_line;
 
                 om_data.drive_cart_cmd(CART_ID, cmd_info.set_speed.vel_line*100000, cmd_info.set_speed.vel_theta*100, om_query_pub);
                 wait();
@@ -299,6 +301,9 @@ int main(int argc, char **argv)
 {
     rclcpp::init(argc, argv);
     node = rclcpp::Node::make_shared("om_cart_node");
+
+    node->declare_parameter<bool>("gear_ratio_above_20_1", false);
+    node->get_parameter("gear_ratio_above_20_1", gear_ratio_above_20_1);
 
     // Subscribers
     auto  om_state_sub = node->create_subscription<om_msgs::msg::State>(
