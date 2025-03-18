@@ -26,18 +26,25 @@ def generate_launch_description():
         Node(
             package='tf2_ros',
             executable='static_transform_publisher',
-            name='tf_map_to_odom',
+            name='tf2_ros_map_odom',
             arguments='0.0 0.0 0.0 0.0 0.0 0.0 map odom'.split(' '),
-            parameters=[parameter_file],
             output='screen'
-        ),
+            ),
         Node(
             package='tf2_ros',
             executable='static_transform_publisher',
-            name='tf_base_link_to_livox_frame',
+            name='tf2_ros_base_link_livox_frame',
             arguments='0.0 0.0 0.0 0.0 0.0 0.0 base_link livox_frame'.split(' '),
-            parameters=[parameter_file],
             output='screen'
+            ),
+        Node(
+            package='robot_state_publisher',
+            executable='robot_state_publisher',
+            name='robot_state_publisher',
+            output='screen',
+            parameters=[{
+                'robot_description': Command(['xacro', ' ', xacro_path])
+            }]
         ),
         Node(
             package='lio_sam',
