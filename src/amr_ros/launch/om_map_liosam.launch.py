@@ -73,5 +73,5 @@ def generate_launch_description():
         livox_driver2_launch,
         lio_sam_launch,
         pointcloud_to_scan_node,
-        slam_toolbox_launch
+        # slam_toolbox_launch
     ])
