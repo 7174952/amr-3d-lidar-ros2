@@ -27,6 +27,8 @@ def generate_launch_description():
     init_oz = LaunchConfiguration('init_oz', default='0.0')
     init_ow = LaunchConfiguration('init_ow', default='1.0')
 
+    globalmap_path = LaunchConfiguration('globalmap_path', default='/home/mikuni/ros2_ws/src/amr_ros/maps/my_test1/GlobalMap.pcd')
+
     # optional arguments
     use_imu                          = LaunchConfiguration('use_imu', default='true')
     invert_imu_acc                   = LaunchConfiguration('invert_imu_acc', default='false')
@@ -52,7 +54,6 @@ def generate_launch_description():
     )
 
     container = ComposableNodeContainer(
-        # declare_parameter('globalmap_pcd', '/home/ros2_2/src/hdl_localization/data/map.pcd'),
         name='container',
         namespace='',
         package='rclcpp_components',
@@ -63,7 +64,7 @@ def generate_launch_description():
                 plugin='hdl_localization::GlobalmapServer',
                 name='GlobalmapServer',
                 parameters=[
-                    {'globalmap_pcd': '/home/mikuni/ros2_ws/src/amr_ros/maps/cloudGlobal.pcd'},
+                    {'globalmap_pcd': globalmap_path},
                     {'convert_utm_to_local': True},
                     {'downsample_resolution': 0.05}]),
             ComposableNode(
@@ -109,7 +110,7 @@ def generate_launch_description():
             name='hdl_global_localization',
             output='screen',
         ),
-        livox_rviz
+        # livox_rviz
 
 
     ])
