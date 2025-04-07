@@ -13,6 +13,12 @@ def generate_launch_description():
     xacro_path = os.path.join(share_dir, 'config', 'robot.urdf.xacro')
     rviz_config_file = os.path.join(share_dir, 'config', 'rviz2.rviz')
 
+    save_pcd_dir_arg = DeclareLaunchArgument(
+        'savePCDDirectory',
+        default_value='/Downloads/LOAM/',
+        description='Directory to save PCD maps'
+    )
+
     params_declare = DeclareLaunchArgument(
         'params_file',
         default_value=os.path.join(
@@ -23,6 +29,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         params_declare,
+        save_pcd_dir_arg,
         Node(
             package='tf2_ros',
             executable='static_transform_publisher',
@@ -71,7 +78,8 @@ def generate_launch_description():
             package='lio_sam',
             executable='lio_sam_mapOptimization',
             name='lio_sam_mapOptimization',
-            parameters=[parameter_file],
+            parameters=[parameter_file,
+            {'savePCDDirectory': LaunchConfiguration('savePCDDirectory')}],
             output='screen'
         ),
         Node(
