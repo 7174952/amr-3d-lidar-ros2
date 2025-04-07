@@ -2,8 +2,8 @@
 Version=1.0
 Name=Guide Robot
 Comment=Startup Mikuni guide robot application
-Exec=bash -c "source /opt/ros/noetic/setup.bash && source ~/catkin_ws/devel/setup.bash && roslaunch gui_guide GUI.launch"
-Icon=/home/mikuni/catkin_ws/src/amr_ros/resource/robot.png
+Exec=bash -c "source /opt/ros/jazzy/setup.bash && source ~/ros2_ws/install/setup.bash && ros2 launch robot_gui robot_gui.launch.py"
+Icon=/home/mikuni/ros2_ws/src/amr_ros/resource/robot.png
 Terminal=false
 Type=Application
 StartupWMClass=GuideRobot
