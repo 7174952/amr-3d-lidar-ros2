@@ -11,7 +11,9 @@ from launch_ros.parameter_descriptions import ParameterValue
 def generate_launch_description():
 
     return LaunchDescription([
-        DeclareLaunchArgument("device", default_value="/dev/input/js0"),
+        DeclareLaunchArgument("device", default_value="/dev/input/js-joystick"),
+        DeclareLaunchArgument('gear_ratio_above_20_1', default_value='false', description=''),
+        DeclareLaunchArgument('cart_tread', default_value='0.39', description='width of between wheel. unit: meter'),
 
         Node(
             package="joy",
@@ -27,5 +29,10 @@ def generate_launch_description():
             executable='om_manual_node',
             name='om_manual_node',
             output='screen',
+            parameters=[{
+                        'gear_ratio_above_20_1': LaunchConfiguration('gear_ratio_above_20_1'),
+                        'cart_tread': LaunchConfiguration('cart_tread'),
+            }]
+
         )
     ])

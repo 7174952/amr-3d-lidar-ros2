@@ -7,6 +7,14 @@ endif()
 
 # 查找 ament_cmake 依赖
 find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(pcl_conversions REQUIRED)
+find_package(PCL REQUIRED COMPONENTS common io filters)
+find_package(Eigen3 REQUIRED)
 
 # 查找 Qt5 5.15 的 Widgets 和 Multimedia 模块
 find_package(Qt5 5.15 REQUIRED COMPONENTS Widgets Multimedia)
@@ -17,28 +25,30 @@ set(CMAKE_AUTOUIC ON)
 # 查找 OpenCV 库
 find_package(OpenCV REQUIRED)
 
-add_executable(my_node src/my_node.cpp)
-target_include_directories(my_node PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
-  ${OpenCV_INCLUDE_DIRS})
-target_compile_features(my_node PUBLIC c_std_99 cxx_std_17)
-
-# 链接 Qt 和 OpenCV 库
-target_link_libraries(my_node Qt5::Widgets Qt5::Multimedia Qt5::Core ${OpenCV_LIBS})
-
-install(
-  DIRECTORY launch
-  DESTINATION share/${PROJECT_NAME}/
+include_directories(
+  include
+  ${PCL_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIRS}
+  ${Qt5Core_INCLUDE_DIRS}
 )
 
-install(
-  DIRECTORY config
-  DESTINATION share/${PROJECT_NAME}/
-)
+add_executable(obstacle_detector_node src/obstacle_detector.cpp)
+ament_target_dependencies(obstacle_detector_node rclcpp std_msgs sensor_msgs geometry_msgs pcl_conversions)
+target_link_libraries(obstacle_detector_node ${PCL_LIBRARIES})
 
-install(TARGETS my_node
+#target_link_libraries(obstacle_detector_node Qt5::Widgets Qt5::Multimedia Qt5::Core ${OpenCV_LIBS} ${PCL_LIBRARIES})
+
+install(TARGETS
+    obstacle_detector_node
   DESTINATION lib/${PROJECT_NAME})
+
+install(DIRECTORY
+    launch
+    config
+    rviz
+  DESTINATION share/${PROJECT_NAME}/
+)
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
