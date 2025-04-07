@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>834</width>
-    <height>426</height>
+    <height>524</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>640</x>
-     <y>390</y>
+     <y>470</y>
      <width>181</width>
      <height>32</height>
     </rect>
@@ -35,7 +35,7 @@
      <x>10</x>
      <y>10</y>
      <width>811</width>
-     <height>371</height>
+     <height>441</height>
     </rect>
    </property>
    <property name="currentIndex">
@@ -51,7 +51,7 @@
        <x>10</x>
        <y>10</y>
        <width>781</width>
-       <height>321</height>
+       <height>391</height>
       </rect>
      </property>
      <layout class="QFormLayout" name="formLayout">
@@ -222,6 +222,115 @@
          </widget>
         </item>
        </layout>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="label_PythonPathCamera">
+        <property name="text">
+         <string>Virtual Python Path for Camera</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_9">
+        <item>
+         <widget class="QLineEdit" name="lineEdit_PythonPathCamera"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_PythonPathCamera">
+          <property name="text">
+           <string>Select</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="9" column="0">
+       <widget class="QLabel" name="label_PythonPathVoice">
+        <property name="text">
+         <string>Virtual Python Path for Voice</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_10">
+        <item>
+         <widget class="QLineEdit" name="lineEdit_PythonPathVoice"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_PythonPathVoice">
+          <property name="text">
+           <string>Select</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tab_robotSize">
+    <attribute name="title">
+     <string>Robot Size</string>
+    </attribute>
+    <widget class="QWidget" name="formLayoutWidget_2">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>30</y>
+       <width>331</width>
+       <height>271</height>
+      </rect>
+     </property>
+     <layout class="QFormLayout" name="formLayout_2">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_obstRangeMin">
+        <property name="text">
+         <string>Obstacle Range Min (m)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_obstRangeMax">
+        <property name="text">
+         <string>Obstacle Range Max (m)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="lineEdit_obstRangeMax"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_robotWidth">
+        <property name="text">
+         <string>Robot Width (m)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="lineEdit_obstRangeMin"/>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="lineEdit_robotWidth"/>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="label_WidthTolarance">
+        <property name="text">
+         <string>Robot Width Tolerance (m)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="lineEdit_obstTolerance"/>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_robotHeight">
+        <property name="text">
+         <string>Robot Height (m)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="lineEdit_robotHeight"/>
       </item>
      </layout>
     </widget>

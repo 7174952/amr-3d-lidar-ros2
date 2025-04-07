@@ -7,6 +7,8 @@
 #include <QMap>
 #include <QSettings>
 
+#include "global_dataset.h"
+
 namespace Ui {
 class SubWindow_System;
 }
@@ -42,15 +44,17 @@ private slots:
 
     void on_buttonBox_accepted();
 
+    void on_pushButton_PythonPathCamera_clicked();
+
+    void on_pushButton_PythonPathVoice_clicked();
+
 private:
     QString setup_path();
-
-public:
-    QMap<QString, QString> getSystemConfigPath();
 
 private:
     Ui::SubWindow_System *ui;
     QMap<QString, QString> system_path;
+    QMap<QString, QString> robot_size;
 };
 
 #endif // SUBWINDOW_SYSTEM_H

@@ -32,6 +32,12 @@
     <property name="frameShape">
      <enum>QFrame::Box</enum>
     </property>
+    <property name="verticalScrollBarPolicy">
+     <enum>Qt::ScrollBarAsNeeded</enum>
+    </property>
+    <property name="horizontalScrollBarPolicy">
+     <enum>Qt::ScrollBarAsNeeded</enum>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar_main">
@@ -44,8 +50,17 @@
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
+    <property name="tabletTracking">
+     <bool>true</bool>
+    </property>
+    <property name="tearOffEnabled">
+     <bool>true</bool>
+    </property>
     <property name="title">
      <string>&amp;File</string>
+    </property>
+    <property name="toolTipsVisible">
+     <bool>false</bool>
     </property>
     <addaction name="action_New"/>
     <addaction name="action_Print"/>
@@ -74,6 +89,7 @@
     <property name="title">
      <string>&amp;Navigation</string>
     </property>
+    <addaction name="action_Guide_Robot"/>
    </widget>
    <widget class="QMenu" name="menu_Setup">
     <property name="title">
@@ -86,6 +102,7 @@
     <property name="title">
      <string>&amp;Tools</string>
     </property>
+    <addaction name="action_Debug_Enable"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
@@ -98,6 +115,7 @@
     </property>
     <addaction name="action_Manual_Control"/>
     <addaction name="actionSet_Motor_Brake"/>
+    <addaction name="actionInit_Pose"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_View"/>
@@ -123,9 +141,13 @@
    <addaction name="separator"/>
    <addaction name="action_Make_Route"/>
    <addaction name="separator"/>
+   <addaction name="action_Guide_Robot"/>
+   <addaction name="separator"/>
    <addaction name="action_Manual_Control"/>
+   <addaction name="separator"/>
    <addaction name="actionSet_Motor_Brake"/>
    <addaction name="separator"/>
+   <addaction name="actionInit_Pose"/>
   </widget>
   <widget class="QStatusBar" name="statusBar_main">
    <property name="cursor">
@@ -203,41 +225,27 @@
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="label_BehindCamera">
+       <widget class="QLabel" name="label_GuideCamera">
         <property name="text">
-         <string>Behind Camera</string>
+         <string>Guide Camera</string>
         </property>
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QCheckBox" name="checkBox_BehindCamera">
+       <widget class="QCheckBox" name="checkBox_GuideCamera">
         <property name="text">
          <string>Enable</string>
         </property>
        </widget>
       </item>
       <item row="3" column="0">
-       <widget class="QLabel" name="label_GuideFunc">
-        <property name="text">
-         <string>Guide Function</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QCheckBox" name="checkBox_GuideFunc">
-        <property name="text">
-         <string>Enable</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
        <widget class="QLabel" name="label_GnssSensor">
         <property name="text">
          <string>GNSS</string>
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
+      <item row="3" column="1">
        <widget class="QCheckBox" name="checkBox_GnssSensor">
         <property name="text">
          <string>Enable</string>
@@ -313,13 +321,30 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QLCDNumber" name="lcdNumber_BatVolt">
-          <property name="digitCount">
-           <number>1</number>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_BatCurr">
+          <property name="text">
+           <string>Current (A)</string>
           </property>
-          <property name="segmentStyle">
-           <enum>QLCDNumber::Filled</enum>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="lineEdit_BatVolt">
+          <property name="styleSheet">
+           <string notr="true">font: 12pt &quot;Sans Serif&quot;;</string>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLineEdit" name="lineEdit_BatCurr">
+          <property name="styleSheet">
+           <string notr="true">font: 12pt &quot;Sans Serif&quot;;</string>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -335,7 +360,18 @@
       <item>
        <layout class="QFormLayout" name="formLayout_3">
         <item row="0" column="1">
-         <widget class="QComboBox" name="comboBox_SpeedUnit"/>
+         <widget class="QComboBox" name="comboBox_SpeedUnit">
+          <item>
+           <property name="text">
+            <string>m/s</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>km/h</string>
+           </property>
+          </item>
+         </widget>
         </item>
         <item row="0" column="0">
          <widget class="QLabel" name="label_SpeedUnit">
@@ -352,12 +388,12 @@
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QLCDNumber" name="lcdNumber_LineSpeed">
-          <property name="smallDecimalPoint">
-           <bool>true</bool>
+         <widget class="QLineEdit" name="lineEdit_LineSpeed">
+          <property name="styleSheet">
+           <string notr="true">font: 12pt &quot;Sans Serif&quot;;</string>
           </property>
-          <property name="digitCount">
-           <number>1</number>
+          <property name="readOnly">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -438,6 +474,24 @@
   <action name="action_Make_Route">
    <property name="text">
     <string>Make Route</string>
+   </property>
+  </action>
+  <action name="actionInit_Pose">
+   <property name="text">
+    <string>Init Pose</string>
+   </property>
+  </action>
+  <action name="action_Guide_Robot">
+   <property name="text">
+    <string>Guide Robot</string>
+   </property>
+  </action>
+  <action name="action_Debug_Enable">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Debug Mode</string>
    </property>
   </action>
  </widget>

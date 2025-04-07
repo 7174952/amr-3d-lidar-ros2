@@ -11,9 +11,12 @@ int main(int argc, char *argv[])
 
   // 初始化 Qt 应用程序
   QApplication app(argc, argv);
+  app.setApplicationName("GuideRobot");
+  app.setApplicationDisplayName("mikuni");
 
   // 创建各个窗口（根据需要选择显示哪些）
   MainWindow mainWindow;
+  mainWindow.setWindowTitle(QString::fromStdString("Guide Robot"));
   mainWindow.show();
 
   int ret = app.exec();

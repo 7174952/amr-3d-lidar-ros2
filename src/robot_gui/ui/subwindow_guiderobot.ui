@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SubWindow_GuideRobot</class>
+ <widget class="QDialog" name="SubWindow_GuideRobot">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1220</width>
+    <height>712</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <widget class="QGraphicsView" name="graphicsView">
+   <property name="geometry">
+    <rect>
+     <x>470</x>
+     <y>30</y>
+     <width>691</width>
+     <height>611</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_userConfig">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>30</y>
+     <width>361</width>
+     <height>201</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Config</string>
+   </property>
+   <widget class="QWidget" name="formLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>341</width>
+      <height>161</height>
+     </rect>
+    </property>
+    <layout class="QFormLayout" name="formLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_maxVel">
+       <property name="text">
+        <string>Max Speed (m/s)   </string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QComboBox" name="comboBox_maxVel">
+       <property name="editable">
+        <bool>true</bool>
+       </property>
+       <property name="currentText">
+        <string>0.8</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>0.8</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>0.7</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>0.6</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>0.5</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>0.4</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>0.3</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>0.2</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_cameraGuideEn">
+       <property name="text">
+        <string>Guide by Camera</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QCheckBox" name="checkBox_cameraGuide">
+       <property name="text">
+        <string>Enable</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_operation">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>260</y>
+     <width>381</width>
+     <height>391</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Operation</string>
+   </property>
+   <widget class="QWidget" name="verticalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>361</width>
+      <height>341</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QPushButton" name="pushButton_startRobot">
+       <property name="styleSheet">
+        <string notr="true">font: 14pt &quot;Sans Serif&quot;;</string>
+       </property>
+       <property name="text">
+        <string>Press to Start Robot App</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <property name="sizeConstraint">
+        <enum>QLayout::SetDefaultConstraint</enum>
+       </property>
+       <item>
+        <widget class="QLabel" name="label_currentLocation">
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="text">
+          <string>Current Location</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="lineEdit_currentLocation">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QLabel" name="label_targets_list">
+         <property name="text">
+          <string>Target</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QListView" name="listView_targets_list"/>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton_NaviGo">
+       <property name="styleSheet">
+        <string notr="true">font: 11pt &quot;Sans Serif&quot;;</string>
+       </property>
+       <property name="text">
+        <string>GO</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

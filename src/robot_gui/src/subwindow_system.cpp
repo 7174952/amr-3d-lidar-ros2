@@ -16,31 +16,24 @@ SubWindow_System::~SubWindow_System()
 
 void SubWindow_System::initConfig()
 {
-    QSettings settings("mikuni", "GuideRobot/Path");
-
-    system_path["ProjectPath"]    = settings.value("ProjectPath", "").toString();
+    system_path = Global_DataSet::instance().sysPath();
     ui->lineEdit_ProjectPath->setText(system_path["ProjectPath"]);
-
-    system_path["InstallPath"]    = settings.value("InstallPath", "").toString();
     ui->lineEdit_InstallPath->setText(system_path["InstallPath"]);
-
-    system_path["MapPath"]        = settings.value("MapPath", "").toString();
     ui->lineEdit_MapPath->setText(system_path["MapPath"]);
-
-    system_path["PointCloudPath"] = settings.value("PointCloudPath", "").toString();
     ui->lineEdit_PointCloudPath->setText(system_path["PointCloudPath"]);
-
-    system_path["BagDataPath"]    = settings.value("BagDataPath", "").toString();
     ui->lineEdit_BagDataPath->setText(system_path["BagDataPath"]);
-
-    system_path["ScriptPath"]     = settings.value("ScriptPath", "").toString();
     ui->lineEdit_ScriptPath->setText(system_path["ScriptPath"]);
-
-    system_path["LaunchPath"]     = settings.value("LaunchPath", "").toString();
     ui->lineEdit_LaunchPath->setText(system_path["LaunchPath"]);
-
-    system_path["ResourcePath"]   = settings.value("ResourcePath", "").toString();
     ui->lineEdit_ResourcePath->setText(system_path["ResourcePath"]);
+    ui->lineEdit_PythonPathCamera->setText(system_path["PyPathCamera"]);
+    ui->lineEdit_PythonPathVoice->setText(system_path["PyPathVoice"]);
+
+    robot_size = Global_DataSet::instance().robotSize();
+    ui->lineEdit_obstRangeMin->setText(robot_size["ObstRangeMin"]);
+    ui->lineEdit_obstRangeMax->setText(robot_size["ObstRangeMax"]);
+    ui->lineEdit_robotWidth->setText(robot_size["RobotWidth"]);
+    ui->lineEdit_robotHeight->setText(robot_size["RobotHeight"]);
+    ui->lineEdit_obstTolerance->setText(robot_size["RobotWidthTole"]);
 
 
 }
@@ -48,6 +41,17 @@ void SubWindow_System::initConfig()
 void SubWindow_System::saveConfig()
 {
      QSettings settings("mikuni", "GuideRobot/Path");
+
+     system_path["ProjectPath"] = ui->lineEdit_ProjectPath->text();
+     system_path["InstallPath"] = ui->lineEdit_InstallPath->text();
+     system_path["MapPath"] = ui->lineEdit_MapPath->text();
+     system_path["PointCloudPath"] = ui->lineEdit_PointCloudPath->text();
+     system_path["BagDataPath"] = ui->lineEdit_BagDataPath->text();
+     system_path["ScriptPath"] =  ui->lineEdit_ScriptPath->text();
+     system_path["LaunchPath"] = ui->lineEdit_LaunchPath->text();
+     system_path["ResourcePath"] = ui->lineEdit_ResourcePath->text();
+     system_path["PyPathCamera"] = ui->lineEdit_PythonPathCamera->text();
+     system_path["PyPathVoice"] = ui->lineEdit_PythonPathVoice->text();
 
      //Save all path
      settings.setValue("ProjectPath", system_path["ProjectPath"]);
@@ -58,6 +62,27 @@ void SubWindow_System::saveConfig()
      settings.setValue("ScriptPath", system_path["ScriptPath"]);
      settings.setValue("LaunchPath", system_path["LaunchPath"]);
      settings.setValue("ResourcePath", system_path["ResourcePath"]);
+     settings.setValue("PyPathCamera", system_path["PyPathCamera"]);
+     settings.setValue("PyPathVoice", system_path["PyPathVoice"]);
+
+
+     Global_DataSet::instance().setSysPath(system_path);
+
+     //save all robot size
+     QSettings settings_size("mikuni", "GuideRobot/Size");
+     robot_size["ObstRangeMin"] = ui->lineEdit_obstRangeMin->text();
+     robot_size["ObstRangeMax"] = ui->lineEdit_obstRangeMax->text();
+     robot_size["RobotWidth"] = ui->lineEdit_robotWidth->text();
+     robot_size["RobotHeight"] = ui->lineEdit_robotHeight->text();
+     robot_size["RobotWidthTole"] = ui->lineEdit_obstTolerance->text();
+
+     settings_size.setValue("ObstRangeMin", robot_size["ObstRangeMin"]);
+     settings_size.setValue("ObstRangeMax", robot_size["ObstRangeMax"]);
+     settings_size.setValue("RobotWidth", robot_size["RobotWidth"]);
+     settings_size.setValue("RobotHeight", robot_size["RobotHeight"]);
+     settings_size.setValue("RobotWidthTole", robot_size["RobotWidthTole"]);
+
+     Global_DataSet::instance().setRobotSize(robot_size);
 
 }
 
@@ -72,121 +97,63 @@ QString SubWindow_System::setup_path()
     return dir;
 }
 
-QMap<QString, QString> SubWindow_System::getSystemConfigPath()
-{
-    return system_path;
-}
-
 void SubWindow_System::on_pushButton_ProjectPath_clicked()
 {
-    QString dir = setup_path();
+    ui->lineEdit_ProjectPath->setText(setup_path());
 
-    if (!dir.isEmpty())
-    {
-        ui->lineEdit_ProjectPath->setText(dir);
-        system_path["ProjectPath"] = dir;
-
-    }
 }
-
 
 void SubWindow_System::on_pushButton_InstallPath_clicked()
 {
-    QString dir = setup_path();
-
-    if (!dir.isEmpty())
-    {
-        ui->lineEdit_InstallPath->setText(dir);
-        system_path["InstallPath"] = dir;
-    }
+    ui->lineEdit_InstallPath->setText(setup_path());
 }
-
 
 void SubWindow_System::on_pushButton_MapPath_clicked()
 {
-    QString dir = setup_path();
-
-    if (!dir.isEmpty())
-    {
-        ui->lineEdit_MapPath->setText(dir);
-        system_path["MapPath"] = dir;
-
-    }
-
+    ui->lineEdit_MapPath->setText(setup_path());
 }
-
 
 void SubWindow_System::on_pushButton_PointCloudPath_clicked()
 {
-    QString dir = setup_path();
-
-    if (!dir.isEmpty())
-    {
-        ui->lineEdit_PointCloudPath->setText(dir);
-        system_path["PointCloudPath"] = dir;
-    }
-
+    ui->lineEdit_PointCloudPath->setText(setup_path());
 }
-
 
 void SubWindow_System::on_pushButton_BagDataPath_clicked()
 {
-    QString dir = setup_path();
-
-    if (!dir.isEmpty())
-    {
-        ui->lineEdit_BagDataPath->setText(dir);
-        system_path["BagDataPath"] = dir;
-
-    }
-
+    ui->lineEdit_BagDataPath->setText(setup_path());
 }
-
 
 void SubWindow_System::on_pushButton_ScriptPath_clicked()
 {
-    QString dir = setup_path();
-
-    if (!dir.isEmpty())
-    {
-        ui->lineEdit_ScriptPath->setText(dir);
-        system_path["ScriptPath"] = dir;
-
-    }
-
+    ui->lineEdit_ScriptPath->setText(setup_path());
 }
-
 
 void SubWindow_System::on_pushButton_LaunchPath_clicked()
 {
-    QString dir = setup_path();
-
-    if (!dir.isEmpty())
-    {
-        ui->lineEdit_LaunchPath->setText(dir);
-        system_path["LaunchPath"] = dir;
-
-    }
-
+    ui->lineEdit_LaunchPath->setText(setup_path());
 }
-
 
 void SubWindow_System::on_pushButton_ResourcePath_clicked()
 {
-    QString dir = setup_path();
-
-    if (!dir.isEmpty())
-    {
-        ui->lineEdit_ResourcePath->setText(dir);
-        system_path["ResourcePath"] = dir;
-
-    }
-
+    ui->lineEdit_ResourcePath->setText(setup_path());
 }
-
 
 void SubWindow_System::on_buttonBox_accepted()
 {
     saveConfig();
+}
+
+
+void SubWindow_System::on_pushButton_PythonPathCamera_clicked()
+{
+    ui->lineEdit_PythonPathCamera->setText(setup_path());
+
+}
+
+
+void SubWindow_System::on_pushButton_PythonPathVoice_clicked()
+{
+    ui->lineEdit_PythonPathVoice->setText(setup_path());
+
 }
 

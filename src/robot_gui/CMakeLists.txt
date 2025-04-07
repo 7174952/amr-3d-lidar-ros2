@@ -11,6 +11,14 @@ find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2_eigen REQUIRED)
+
+find_package(Bullet REQUIRED)
+find_package(visualization_msgs REQUIRED)
 find_package(om_cart REQUIRED)
 
 
@@ -31,6 +39,7 @@ set(UI_FILES
   ui/subwindow_manualcontrol.ui
   ui/subwindow_makemap.ui
   ui/subwindow_makeroute.ui
+  ui/subwindow_guiderobot.ui
 
 )
 
@@ -39,7 +48,7 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
 # 使用 qt5_wrap_ui 将 UI 文件转换成对应的头文件
 qt5_wrap_ui(UI_HEADERS ${UI_FILES})
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ${BULLET_INCLUDE_DIRS})
 message("CMAKE_CURRENT_SOURCE_DIR:" ${CMAKE_CURRENT_SOURCE_DIR})
 
 
@@ -51,10 +60,12 @@ add_executable(${PROJECT_NAME}_node
     src/subwindow_system.cpp
     src/subwindow_manualcontrol.cpp
     src/utils.cpp
+    src/global_dataset.cpp
     src/subwindow_makemap.cpp
     src/subwindow_makeroute.cpp
+    src/subwindow_guiderobot.cpp
     ${UI_HEADERS})
-ament_target_dependencies(${PROJECT_NAME}_node rclcpp std_msgs sensor_msgs geometry_msgs om_cart)
+ament_target_dependencies(${PROJECT_NAME}_node rclcpp std_msgs sensor_msgs geometry_msgs nav_msgs std_srvs tf2_ros tf2_eigen visualization_msgs om_cart)
 
 target_include_directories(${PROJECT_NAME}_node PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -63,7 +74,7 @@ target_include_directories(${PROJECT_NAME}_node PUBLIC
 target_compile_features(${PROJECT_NAME}_node PUBLIC c_std_99 cxx_std_17)
 
 # 链接 Qt 和 OpenCV 库
-target_link_libraries(${PROJECT_NAME}_node Qt5::Widgets Qt5::Multimedia Qt5::Core ${OpenCV_LIBS})
+target_link_libraries(${PROJECT_NAME}_node Qt5::Widgets Qt5::Multimedia Qt5::Core ${OpenCV_LIBS} ${BULLET_LIBRARIES})
 
 install(
   DIRECTORY launch
