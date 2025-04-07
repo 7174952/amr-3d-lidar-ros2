@@ -39,6 +39,8 @@ public:
     bool get_cmd_ready();
 
 public:
+    double CART_TREAD;
+
     // Modbus definitions
     const uint8_t global_id = 0x0F;  // broadcast all slaves in same group
     const uint8_t slave_1_id = 1;
@@ -50,8 +52,6 @@ public:
     const uint8_t f_read_write = 2;  // read and write at same time
 
 private:
-    const uint16_t CART_TREAD = 390; // tread = 390 mm
-
     om_msgs::msg::Query msg;
     om_msgs::msg::Query msg_last;
     bool cmd_ready;
@@ -135,13 +135,6 @@ int8_t Om_data::update_share_state(uint8_t slave_share_id, rclcpp::Publisher<om_
 
     return 0;
 }
-
-// int8_t Om_data::get_lastest_query(om_msgs::msg::Query *query_msg)
-// {
-//     query_msg = &msg;
-
-//     return 0;
-// }
 
 int8_t Om_data::drive_wheel_begin(uint8_t slave_id, rclcpp::Publisher<om_msgs::msg::Query>::SharedPtr pub)
 {

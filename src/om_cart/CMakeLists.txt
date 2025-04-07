@@ -47,6 +47,11 @@ add_executable(om_manual_node src/om_manual.cpp)
 ament_target_dependencies(om_manual_node rclcpp sensor_msgs om_modbus_master om_msgs)
 target_link_libraries(om_manual_node "${cpp_typesupport_target}")
 
+install(
+  DIRECTORY include/
+  DESTINATION include
+)
+
 
 install(TARGETS om_cart_node om_manual_node
   DESTINATION lib/${PROJECT_NAME})

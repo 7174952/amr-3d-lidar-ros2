@@ -141,6 +141,6 @@ typedef union
 const uint8_t CART_RESP_INFO_ITEM_SIZE = 12 * 2; //6 * 2; // Left,Right wheel
 
 const uint16_t UNIT_RATIO = 100;
-const uint16_t CART_TREAD = 390; //tread = 390 mm
+double CART_TREAD;
 
 #endif // OM_CART_H

@@ -41,12 +41,6 @@ rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr cart_velocity_pub
 rclcpp::Publisher<om_msgs::msg::Query>::SharedPtr om_query_pub;
 rclcpp::Publisher<om_cart::msg::Status>::SharedPtr cart_status_pub;
 
-// Publishers for AMR info for jsk_rviz_plugins
-rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr cart_bat_volt_pub;
-rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr cart_vel_linear_pub;
-rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr cart_vel_radius_pub;
-rclcpp::Publisher<std_msgs::msg::String>::SharedPtr cart_info_rviz_pub;
-
 std::queue<om_cart::msg::Cmd> cmd_msg_buf;
 double vel_wait_timer = 0; // Ensure stop when no command arrives
 const uint32_t MAX_WAIT_TIME = 50; // 50 => 0.5s
@@ -161,7 +155,6 @@ void om_resp_callback(const om_msgs::msg::Response::SharedPtr msg)
                 cart_status_pub->publish(cart_status_msg);
 
                 //make and send velocity
-
                 msg_velocity.header.stamp    = node->now();
                 msg_velocity.header.frame_id = "";
                 msg_velocity.twist.linear.x  = vel_line;
@@ -169,21 +162,6 @@ void om_resp_callback(const om_msgs::msg::Response::SharedPtr msg)
                 msg_velocity.twist.angular.z = vel_theta;
                 cart_velocity_pub->publish(msg_velocity);
 
-                //To show on rviz by jsk_visualize_plugins
-                cart_val_tmp.data = (cart_status_info.cart_status.main_power_volt_L/10 + cart_status_info.cart_status.main_power_volt_R/10)/2;
-                cart_bat_volt_pub->publish(cart_val_tmp);
-                cart_val_tmp.data = vel_line;
-                cart_vel_linear_pub->publish(cart_val_tmp);
-                cart_val_tmp.data = vel_theta;
-                cart_vel_radius_pub->publish(cart_val_tmp);
-
-                cart_info_rviz_tmp.data = "Normal";
-                if((uint32_t)(cart_status_info.cart_status.alm_code_L != 0) || (uint32_t)(cart_status_info.cart_status.alm_code_R != 0))
-                {
-                    cart_info_rviz_tmp.data = "alm_code_left:" + std::to_string((uint32_t)(cart_status_info.cart_status.alm_code_L)) + "\n"
-                                              "alm_code_right:" + std::to_string((uint32_t)(cart_status_info.cart_status.alm_code_R));
-                }
-                cart_info_rviz_pub->publish(cart_info_rviz_tmp);
             }
             break;
         case FC_WRITE:
@@ -305,19 +283,24 @@ int main(int argc, char **argv)
     node->declare_parameter<bool>("gear_ratio_above_20_1", false);
     node->get_parameter("gear_ratio_above_20_1", gear_ratio_above_20_1);
 
+    node->declare_parameter<double>("cart_tread", 0.39); //meter
+    node->get_parameter("cart_tread", CART_TREAD);
+    CART_TREAD = CART_TREAD * 1000;
+    om_data.CART_TREAD = CART_TREAD;
+
     // Subscribers
     auto  om_state_sub = node->create_subscription<om_msgs::msg::State>(
-        "om_state", 100, std::bind(om_state_callback, std::placeholders::_1));
+        "om_state1", 100, std::bind(om_state_callback, std::placeholders::_1));
 
     auto om_resp_sub = node->create_subscription<om_msgs::msg::Response>(
-        "om_response", 100, std::bind(om_resp_callback, std::placeholders::_1));
+        "om_response1", 100, std::bind(om_resp_callback, std::placeholders::_1));
 
     auto cart_set_cmd_sub = node->create_subscription<om_cart::msg::Cmd>(
         "cart_cmd", 1, std::bind(cart_set_cmd_callback, std::placeholders::_1));
 
 
     auto cart_auto_drive_cmd_sub = node->create_subscription<geometry_msgs::msg::Twist>(
-        "cart_auto_drive_cmd", 1, std::bind(cart_auto_drive_cmd_callback, std::placeholders::_1));
+        "cmd_vel", 1, std::bind(cart_auto_drive_cmd_callback, std::placeholders::_1));
 
     auto cart_s_on_sub = node->create_subscription<std_msgs::msg::Bool>(
         "cart_s_on", 1, std::bind(cart_s_on_callback, std::placeholders::_1));
@@ -326,12 +309,6 @@ int main(int argc, char **argv)
     cart_status_pub = node->create_publisher<om_cart::msg::Status>("cart_status", 100);
     om_query_pub = node->create_publisher<om_msgs::msg::Query>("om_query1", 1);
     cart_velocity_pub = node->create_publisher<geometry_msgs::msg::TwistStamped>("vehicle_vel", 100);
-
-    // Publishers for AMR info for jsk_rviz_plugins
-    cart_bat_volt_pub = node->create_publisher<std_msgs::msg::Float32>("cart_vbat", 10);
-    cart_vel_linear_pub = node->create_publisher<std_msgs::msg::Float32>("vel_linear", 10);
-    cart_vel_radius_pub = node->create_publisher<std_msgs::msg::Float32>("vel_radius", 10);
-    cart_info_rviz_pub = node->create_publisher<std_msgs::msg::String>("cart_info", 10);
 
     // Initialize velocity publisher
     rclcpp::Time init_time = node->now();
