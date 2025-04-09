@@ -21,7 +21,7 @@ def generate_launch_description():
         DeclareLaunchArgument('init_ow', default_value='1.0'),
 
         DeclareLaunchArgument('v_max', default_value='0.6'),
-        DeclareLaunchArgument('w_max', default_value='0.8'),
+        DeclareLaunchArgument('w_max', default_value='0.6'),
         DeclareLaunchArgument('lookahead_distance', default_value='1.0'),
 
         DeclareLaunchArgument('OBST_HIGHT_MIN_Z', default_value='0.0'),
