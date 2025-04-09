@@ -366,8 +366,6 @@ void SubWindow_GuideRobot::personDetect_CallBack(const std_msgs::msg::String& ms
         }
         return;
     }
-//debug_ryu
-    RCLCPP_INFO(node_->get_logger(), "person_info:%s", msg.data.c_str());
 
     QStringList info = QString::fromStdString(msg.data).trimmed().split(QRegExp(";"), Qt::SkipEmptyParts);
     person_info.curr_num = info.at(0).split(":").at(1).toUInt();
@@ -430,10 +428,6 @@ void SubWindow_GuideRobot::personDetect_CallBack(const std_msgs::msg::String& ms
             audioManager->stopGuide(); //tell guest to follow up
         }
     }
-//debug_ryu
-    RCLCPP_INFO(node_->get_logger(), "near_distance:%.2f FAR_STOP:%.2f FAR_START:%2f speed_rate:%.2f",
-                person_info.near_distance, person_info.FAR_STOP, person_info.FAR_START, person_info.speed_rate);
-
     //publish: enable, run by speed_rate
     std_msgs::msg::String guide_msg;
     guide_msg.data = "guide_en:1;speed_rate:" + QString::number(person_info.speed_rate,'f',2).toStdString() + ";";
@@ -686,13 +680,7 @@ void SubWindow_GuideRobot::on_pushButton_NaviGo_toggled(bool checked)
         //terminate application
         ui->pushButton_NaviGo->setText("GO");
         ui->pushButton_NaviGo->setChecked(false);
-#if 0 //debug_ryu
-        QString mp3_path = system_path["ResourcePath"] + "/essay/test/" + navi_target + "_ja.mp3";
-        audioManager->setGreetAudio(mp3_path);
-        emit sendMessage(mp3_path);
-#else
         audioManager->setGreetAudio(system_path["ResourcePath"] + "/essay/" + navi_target + "_ja.mp3");
-#endif
         audioManager->playGreet();
 
     }
