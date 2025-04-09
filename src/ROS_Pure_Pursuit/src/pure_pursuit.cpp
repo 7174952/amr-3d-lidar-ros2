@@ -257,7 +257,7 @@ void PurePursuit::cmd_generator(const nav_msgs::msg::Odometry::SharedPtr odom_ms
 
                     if (set_wait)
                     {
-                        if (this->get_clock()->now().seconds() - wait_time > 1.5)
+                        if (this->get_clock()->now().seconds() - wait_time > 3.0)
                         {
                             init_orient_reached = true;
                             set_wait = false;
