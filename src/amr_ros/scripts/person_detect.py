@@ -62,12 +62,15 @@ class RealsenseYoloNode(Node):
                 center_x = (x1 + x2) // 2
                 center_y = (y1 + y2) // 2
                 distance = depth_frame.get_distance(center_x, center_y)
+                if distance < 0.01:
+                    person_count -= 1
+                    continue
                 label = f'{self.model.names[int(cls)]} {distance:.2f}'
                 cv2.putText(color_image, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-                detection_info.append(f'num_{person_count}:{distance:.2f};')
+                detection_info.append(f'num_{person_count}:{distance:.2f}')
 
         # 发布消息
-        detection_message = f'total:{person_count};' + '; '.join(detection_info)
+        detection_message = f'total:{person_count};' + '; '.join(detection_info) + ';'
         self.get_logger().info(detection_message)
         self.detection_pub.publish(String(data=detection_message))
 
