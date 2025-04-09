@@ -37,6 +37,8 @@ SubWindow_GuideRobot::SubWindow_GuideRobot(rclcpp::Node::SharedPtr node, QWidget
     connect(this, &SubWindow_GuideRobot::odomReceived, this, &SubWindow_GuideRobot::onSetNaviRules);
     person_detect_sub = node_->create_subscription<std_msgs::msg::String>(
                 "/person_detect", 10, std::bind(&SubWindow_GuideRobot::personDetect_CallBack, this, std::placeholders::_1));
+    obstacle_num_sub = node_->create_subscription<std_msgs::msg::Int32>(
+                "/obstacle_points_num", 10, std::bind(&SubWindow_GuideRobot::obstacle_CallBack, this, std::placeholders::_1));
     guide_pub = node_->create_publisher<std_msgs::msg::String>("/guide_control", 10);
 
     rules_pub = node_->create_publisher<std_msgs::msg::String>("/navi_rules", 1);
@@ -67,6 +69,16 @@ SubWindow_GuideRobot::SubWindow_GuideRobot(rclcpp::Node::SharedPtr node, QWidget
     person_info.guide_en = false;
     person_info.near_distance = std::numeric_limits<double>::infinity();
     person_info.speed_rate = 0.0;
+
+    //init sound manager
+    audioManager = new AudioManager(this);
+    system_path = Global_DataSet::instance().sysPath();
+    obstacle_points_num = 0;
+    audioManager->setObstacleAudio(system_path["ResourcePath"] + "/obstacle_alert_ja.mp3");
+    audioManager->setGuideAudio(system_path["ResourcePath"] + "/guide_follow_up_ja.mp3");
+    audioManager->setLoopIntervalForGuide(2000);
+    audioManager->setLoopIntervalForObstacle(2000);
+    guide_annouse = false;
 
 }
 
@@ -261,6 +273,21 @@ void SubWindow_GuideRobot::onGuideCameraStateChanged(const int arg)
     ui->checkBox_cameraGuide->setEnabled(state);
 }
 
+void SubWindow_GuideRobot::obstacle_CallBack(const std_msgs::msg::Int32& msg)
+{
+    //obstacle appeared
+    if((msg.data > 10) && (obstacle_points_num < 10))
+    {
+        audioManager->startObstacle();
+    }
+    //obstacle disappeared
+    if((msg.data < 10) && (obstacle_points_num > 10))
+    {
+        audioManager->stopObstacle();
+    }
+    obstacle_points_num = msg.data;
+}
+
 void SubWindow_GuideRobot::Odometry_CallBack(const nav_msgs::msg::Odometry& odom)
 {
     //update current position and orient
@@ -325,15 +352,22 @@ void SubWindow_GuideRobot::personDetect_CallBack(const std_msgs::msg::String& ms
         return;
     //check distance between robot and first waypoint and the last waypoint
     Robot_Position robot_position = {robot_cur_pose.pos_x, robot_cur_pose.pos_y, robot_cur_pose.pos_z};
-    if(  Utils::distance(robot_position, waypoints_msg.poses.front().pose.position) < 2.0 //Not guide in 2.0 meters when start
-      || Utils::distance(robot_position, waypoints_msg.poses.back().pose.position) < 2.0) //Not guide in 2.0 meters at last
+    if(  Utils::distance(robot_position, waypoints_msg.poses.front().pose.position) < 4.0 //Not guide in 2.0 meters when start
+      || Utils::distance(robot_position, waypoints_msg.poses.back().pose.position) < 4.0) //Not guide in 2.0 meters at last
     {
         //publish :disable
         std_msgs::msg::String guide_msg;
         guide_msg.data = "guide_en:0;speed_rate:0.0;";
         guide_pub->publish(guide_msg);
+        if(guide_annouse)
+        {
+            guide_annouse = false;
+            audioManager->stopGuide();
+        }
         return;
     }
+//debug_ryu
+    RCLCPP_INFO(node_->get_logger(), "person_info:%s", msg.data.c_str());
 
     QStringList info = QString::fromStdString(msg.data).trimmed().split(QRegExp(";"), Qt::SkipEmptyParts);
     person_info.curr_num = info.at(0).split(":").at(1).toUInt();
@@ -359,10 +393,16 @@ void SubWindow_GuideRobot::personDetect_CallBack(const std_msgs::msg::String& ms
         guide_msg.data = "guide_en:1;speed_rate:0.0;";
         guide_pub->publish(guide_msg);
 
+        if(!guide_annouse)
+        {
+            guide_annouse = true;
+            audioManager->startGuide(); //tell guest to follow up
+        }
         return;
     }
     //get nearest person distance
     info.removeFirst(); //delete total num
+    person_info.near_distance = std::numeric_limits<double>::infinity();
     for(const QString& str : info)
     {
         double distance = str.split(":").at(1).toDouble();
@@ -374,12 +414,26 @@ void SubWindow_GuideRobot::personDetect_CallBack(const std_msgs::msg::String& ms
     {
         person_info.speed_rate -= 0.1;
         person_info.speed_rate = std::max(person_info.speed_rate, 0.0);
+        if(!guide_annouse)
+        {
+            guide_annouse = true;
+            audioManager->startGuide(); //tell guest to follow up
+        }
     }
     else if(person_info.near_distance < person_info.FAR_START)
     {
         person_info.speed_rate += 0.1;
         person_info.speed_rate = std::min(person_info.speed_rate, 1.0);
+        if(guide_annouse)
+        {
+            guide_annouse = false;
+            audioManager->stopGuide(); //tell guest to follow up
+        }
     }
+//debug_ryu
+    RCLCPP_INFO(node_->get_logger(), "near_distance:%.2f FAR_STOP:%.2f FAR_START:%2f speed_rate:%.2f",
+                person_info.near_distance, person_info.FAR_STOP, person_info.FAR_START, person_info.speed_rate);
+
     //publish: enable, run by speed_rate
     std_msgs::msg::String guide_msg;
     guide_msg.data = "guide_en:1;speed_rate:" + QString::number(person_info.speed_rate,'f',2).toStdString() + ";";
@@ -548,6 +602,8 @@ void SubWindow_GuideRobot::on_pushButton_startRobot_toggled(bool checked)
         }
 
         ui->pushButton_startRobot->setText("Robot App is Running");
+        audioManager->setGreetAudio(system_path["ResourcePath"] + "/greet_startup_navi_ja.mp3");
+        audioManager->playGreet();
 
     }
     else
@@ -557,6 +613,9 @@ void SubWindow_GuideRobot::on_pushButton_startRobot_toggled(bool checked)
         Utils::terminate_process(guide_robot_process);
         ui->pushButton_startRobot->setText("Press to Start Robot App");
         baseModel->clear();
+        audioManager->setGreetAudio(system_path["ResourcePath"] + "/greet_finish_navi_ja.mp3");
+        audioManager->playGreet();
+
     }
 
 }
@@ -618,6 +677,8 @@ void SubWindow_GuideRobot::on_pushButton_NaviGo_toggled(bool checked)
         rule_state.status = "out";
 
         ui->pushButton_NaviGo->setText("Moving to " + navi_target);
+        audioManager->setGreetAudio(system_path["ResourcePath"] + "/goto_next_target_ja.mp3");
+        audioManager->playGreet();
 
     }
     else
@@ -625,11 +686,17 @@ void SubWindow_GuideRobot::on_pushButton_NaviGo_toggled(bool checked)
         //terminate application
         ui->pushButton_NaviGo->setText("GO");
         ui->pushButton_NaviGo->setChecked(false);
+#if 0 //debug_ryu
+        QString mp3_path = system_path["ResourcePath"] + "/essay/test/" + navi_target + "_ja.mp3";
+        audioManager->setGreetAudio(mp3_path);
+        emit sendMessage(mp3_path);
+#else
+        audioManager->setGreetAudio(system_path["ResourcePath"] + "/essay/" + navi_target + "_ja.mp3");
+#endif
+        audioManager->playGreet();
+
     }
 }
-
-
-
 
 void SubWindow_GuideRobot::on_checkBox_cameraGuide_stateChanged(int arg1)
 {

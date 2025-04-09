@@ -28,10 +28,11 @@
 #include <visualization_msgs/msg/marker.hpp>
 #include <std_msgs/msg/bool.hpp>
 #include <std_srvs/srv/empty.hpp>
+#include <std_msgs/msg/int32.hpp>
 
 #include "utils.h"
 #include "global_dataset.h"
-
+#include "audiomanager.h"
 
 namespace Ui {
 class SubWindow_GuideRobot;
@@ -167,6 +168,7 @@ private:
     void Odometry_CallBack(const nav_msgs::msg::Odometry& odom);
     void reachedGoal_CallBack(const std_msgs::msg::Bool& msg);
     void personDetect_CallBack(const std_msgs::msg::String& msg);
+    void obstacle_CallBack(const std_msgs::msg::Int32& msg);
     void upload_RouteList();
     void upload_LocationList();
     void saveConfig();
@@ -177,7 +179,6 @@ private:
     QString m_mapName;
     QProcess* guide_robot_process;
     QVector<double> last_point;
-//debug_ryu
     QProcess* detect_process;
 
     //define location
@@ -242,8 +243,8 @@ private:
         uint curr_num;
         uint cnt;
         double near_distance;
-        const uint FAR_START = 3.5;
-        const uint FAR_STOP = 4.0;
+        const double FAR_START = 3.5;
+        const double FAR_STOP = 4.0;
         const uint DETECT_MAX_TIMES = 5;
         bool guide_en;
         double speed_rate;  //0.0~1.0, 0.0-stop, 1.0-max vel
@@ -261,14 +262,22 @@ private:
     QStandardItemModel *baseModel;
     FilterProxy *proxyModel;
 
+    AudioManager *audioManager;
+    QMap<QString, QString> system_path;
+    int32_t obstacle_points_num;
+    bool guide_annouse;
+
 private:
     Ui::SubWindow_GuideRobot *ui;
     rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_pub;
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr rules_pub;
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr guide_pub;
+
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub;
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr reached_goal_sub;
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr person_detect_sub;
-    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr guide_pub;
+    rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr obstacle_num_sub;
+
 
     rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr waypoints_pub;
     rclcpp::Client<std_srvs::srv::Empty>::SharedPtr reset_client;

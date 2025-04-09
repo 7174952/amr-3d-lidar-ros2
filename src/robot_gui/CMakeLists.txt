@@ -64,6 +64,7 @@ add_executable(${PROJECT_NAME}_node
     src/subwindow_makemap.cpp
     src/subwindow_makeroute.cpp
     src/subwindow_guiderobot.cpp
+    src/audiomanager.cpp
     ${UI_HEADERS})
 ament_target_dependencies(${PROJECT_NAME}_node rclcpp std_msgs sensor_msgs geometry_msgs nav_msgs std_srvs tf2_ros tf2_eigen visualization_msgs om_cart)
 
