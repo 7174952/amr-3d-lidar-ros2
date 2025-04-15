@@ -1,0 +1,7 @@
+faster-whisper
+openai
+pvporcupine
+pyaudio
+sounddevice
+scipy
+numpy

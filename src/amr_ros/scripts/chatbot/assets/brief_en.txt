@@ -1,0 +1,164 @@
+Mikuni Corporation is a company that conducts a wide range of businesses, from product planning to manufacturing, primarily focusing on parts for four-wheeled vehicles and motorcycles. The company is also involved in products for living environment equipment, welfare vehicles, nursing care devices, parts for the aerospace industry, and greenery-related products.
+
+The head office is located at:
+6-13-11 Sotokanda, Chiyoda-ku, Tokyo, Japan.
+Main Products
+・Engine parts for four-wheeled vehicles (Intake modules, Throttle bodies, Vacuum pumps, etc.)
+・Engine parts for motorcycles (Electronically controlled fuel injection devices, Discharge pumps, Carburetors, Oil pumps, Water pumps, etc.)
+・Fuel pumps
+・Gas control devices and control valves
+・Fuel combustion heaters (Webasto combustion heaters that do not require engine operation (FF type))
+・Gas flame-out safety devices
+・Welfare equipment
+・Humidifiers
+・Lawn mowers, lawn management machines, industrial machinery, and parts
+・Materials, equipment, parts, and accessories for aerospace
+
+Corporate History
+・1923 (Taisho 12) – Established Mikuni Shoten Partnership.
+・1932 (Taisho 13) – Acquired manufacturing rights for carburetors from Amal and Garelli.
+・1933 (Showa 8) – Reorganized as Mikuni Shoten Co., Ltd., inheriting all business operations from the partnership.
+・1936 (Showa 11) – Started production at Kamata Factory.
+・1939 (Showa 14) – Company name changed to Mikuni Shoko Co., Ltd.
+・1944 (Showa 19) – Started production at Odawara Factory (current Odawara Business Site).
+・1948 (Showa 23) – Split into Daini Mikuni Shoko Co., Ltd. and Mikuni Seisakusho Co., Ltd.
+・1949 (Showa 24) – Resumed production of carburetors and mechanical pumps for small automobiles.
+・1950 (Showa 25) – Changed company name from Daini Mikuni Shoko Co., Ltd. to Mikuni Shoko Co., Ltd.
+・1955 (Showa 30) – Mikuni Shoko Co., Ltd. absorbed Mikuni Seisakusho Co., Ltd. through a merger.
+・1960 (Showa 35) – Entered into technical cooperation with Solex of France and started production of Solex-type carburetors.
+・1961 (Showa 36) – Changed company name to Mikuni Kogyo Co., Ltd., and listed on the Second Section of the Tokyo Stock Exchange.
+・1968 (Showa 43) – Established Mikuni American Corporation.
+・1971 (Showa 46) – Entered into technical cooperation with SIT of Italy and started production of flame-out safety devices.
+・1972 (Showa 47) – Established Tohoku Mikuni Kogyo Co., Ltd.
+・1978 (Showa 53) – Started production at Kikugawa Factory. Entered into technical cooperation with Kaiser of the United States and started production of radiator shutters.
+・1991 (Heisei 3) – Changed company name to Mikuni Corporation.
+・2009 (Heisei 21) – Former president of the Chinese local subsidiary sentenced to imprisonment for trade secret infringement. This case is a rare example of a Japanese person receiving a prison sentence in China.
+・2013 (Heisei 25) – Established a joint venture company, Eberspächer Mikuni Climate Control Systems, with Germany's Eberspächer for the purpose of importing, selling, and providing after-sales service of Eberspächer products.
+・2015 (Heisei 27) – Transferred to the First Section of the Tokyo Stock Exchange. Acquired all shares of Nissin Automobile Industry Co., Ltd. (made it a wholly-owned subsidiary). Acquired shares of Asahi Air Supply Co., Ltd. (made it a subsidiary).
+・2016 (Heisei 28) – Acquired all shares of Asahi Air Supply Co., Ltd. (made it a wholly-owned subsidiary). Absorbed the business of manufacturing and sales of welfare equipment, health equipment, and portable humidifiers through company split. Changed the company name of Nissin Automobile Industry Co., Ltd. to Mikuni Life & Auto Co., Ltd.
+・2019 (Heisei 31 / Reiwa 1) – Established a Paris branch office.
+・2022 (Reiwa 4) – Transferred to the Prime Market of the Tokyo Stock Exchange. Established Mikuni Aerospace Co., Ltd.
+・2023 (Reiwa 5) – Decided at the Board of Directors meeting to transfer to the Standard Market of the Tokyo Stock Exchange due to non-compliance with the market maintenance standards (market capitalization of tradable shares) of the Prime Market (transfer scheduled for October 20, 2023).
+
+Corporate Information
+・Company Type: Corporation (Kabushiki Kaisha / Joint-stock company)
+・Stock Exchange: Tokyo Stock Exchange Standard Market, Stock Code 7247
+・Listing Date: October 2, 1961
+・Head Office Address: 6-13-11 Sotokanda, Chiyoda-ku, Tokyo, Japan, 101-0021
+・Establishment Date: October 1, 1948 (Former Daini Mikuni Shoko Co., Ltd.)
+・Industry Classification: Transportation Equipment Manufacturing
+・Corporate Number: 1010001008791
+・Business Activities: Manufacturing and sales of fuel injection-related products, carburetors, heaters, pumps, gas control devices, etc.
+・Representative: Hisataka Ikuta (President & Representative Director)
+・Capital: 2,215.3 million yen
+・Total Shares Outstanding: 34,049,423 shares
+・Consolidated Sales: 80.789 billion yen (Fiscal year ended March 2022)
+・Consolidated Operating Profit: 3.318 billion yen (Fiscal year ended March 2022)
+・Consolidated Net Profit: 1.318 billion yen (Fiscal year ended March 2022)
+・Consolidated Net Assets: 31.918 billion yen (As of March 31, 2022)
+・Consolidated Total Assets: 96.917 billion yen (As of March 31, 2022)
+・Number of Employees: Consolidated – 5,345 people; Non-consolidated – 1,502 people (As of March 31, 2022)
+・Fiscal Year-End: March 31
+
+Major Shareholders (As of March 31, 2022)
+・The Master Trust Bank of Japan, Ltd. – 8.14%
+・Aioi Nissay Dowa Insurance Co., Ltd. – 5.60%
+・Resona Bank, Ltd. – 4.93%
+・Bank of Yokohama, Ltd. – 4.93%
+・Custody Bank of Japan, Ltd. – 3.79%
+
+Major Subsidiaries
+・Mikuni Partec Co., Ltd. – 100% ownership
+・Mikuni Aerospace Co., Ltd. – 100% ownership
+・Mikuni Life & Auto Co., Ltd. – 100% ownership
+
+Automotive-related Products for Four-wheeled Vehicles
+・Electronically Controlled Throttle Body: Optimizes output control of gasoline engines (ETV) and vacuum control of diesel engines (ACV) through electronic control of throttle valve opening and closing.
+・Resin Intake Manifold: Lightweight and cost-effective intake manifold made of resin.
+・Variable Valve Timing System (VVT & OCV): Hydraulic actuator and solenoid valve for controlling engine valve timing.
+・Electric Oil Pump: Trochoid oil pump driven by brushless DC motor with integrated driver.
+・Electric Vacuum Pump: Vacuum pump for electric vehicles (EV) and hybrid vehicles (HEV), supplying vacuum for brake booster systems, etc.
+・Vacuum Pump: Vacuum pump for diesel and gasoline vehicles, supplying vacuum for brake booster systems, etc.
+・Electronically Controlled Exhaust Valve: Throttle valve that controls exhaust pressure and exhaust heat of diesel and gasoline engines.
+・Coolant Control Valve: Controls multiple coolant flow paths inside the engine with a single body, achieving rapid warm-up, improved combustion, reduced friction, and reduced cooling loss, thus improving fuel efficiency and emissions.
+・Active Pedal: Pedal module with integrated controller featuring an actuator-driven function to push back the accelerator pedal (active function).
+Automotive-related Products for Motorcycles and Special-purpose Machinery
+・Electronically Controlled Throttle Body (ETV) for Motorcycles: Throttle body capable of controlling engine output and idling through electronic control of the throttle valve, compatible with various cylinder numbers and layouts.
+・Throttle Body for Motorcycles: Throttle body equipped with functions such as sub-throttle, idling control devices, and integrated sensors, suitable for applications ranging from small motorcycles to large motorcycles.
+・Electronically Controlled Throttle Body (ETV) for Utility Vehicles: Throttle body that controls engine output and idling through electronic throttle valve control, considering off-road use.
+・Intake Module for Motorcycles: Modularized intake system parts including a lightweight, cost-effective resin intake manifold and electronically controlled throttle body.
+・Intake Module for Outboard Engines: Modularized intake system parts including a resin intake manifold with a VST (Vapor Separate Tank) unique to outboard engines and an electronically controlled throttle body.
+・Intake Module for PWC (Personal Watercraft): Intake module integrating an electronically controlled throttle body, resin intake manifold, and resin fuel rail.
+・Engine Control Unit (ECU) for Motorcycles: ECU that comprehensively controls the engine's intake/exhaust systems, fuel supply systems, ignition systems, etc.
+・Variable Valve Timing System (VVT & OCV) for Motorcycles: Compact hydraulic actuator and solenoid valve for controlling engine valve timing, designed for installation in motorcycles.
+・Variable Valve Timing System (VVT & OCV) for Outboard Engines: Hydraulic actuator and solenoid valve for controlling engine valve timing, considering the usage environment and installation in outboard engines.
+・Oil Pump (Trochoid Type): Pump for circulating lubrication oil in 4-stroke engines, achieving low cost through in-house production of trochoid rotors.
+・Water Pump: Impeller-type coolant circulation pump used in water-cooled engines.
+・Resin Fuel Pump: Diaphragm-type fuel pump with vacuum-type and piston-type variations, achieving lightweight and low cost with a resin body. Some models include priming functionality.
+    Secondary Air Valve: Sends air into the exhaust port to re-burn unburned gases. There are also types that cut off secondary air to prevent afterburning.
+    TMR-type Carburetor for Motorcycles: Racing-use carburetor adopting a smooth bore design, improving intake efficiency for higher output.
+    
+Corporate Philosophy
+We, with a global perspective, will leverage people and technology to contribute to the creation of a prosperous society.
+
+Action Guidelines
+・Earn correctly
+・Proceed wisely
+・Respond quickly
+・Challenge joyfully
+・Transform dreams into reality and excitement
+
+Brand Message
+Our brand message, "Create, Protect, and Pioneer," represents not only our corporate philosophy of "Contributing to the Creation of a Prosperous Society" but also expresses Mikuni's unchanging aspirations from its founding, through the present, and into the future.
+Reflecting on Mikuni's contributions to society over its history and considering the meaning of our existence at the 100-year milestone, we have concluded that our answer lies in this brand message: "Create, Protect, and Pioneer."
+In the past, Mikuni supported motorization at its core by "creating" carburetors with expert craftsmanship, "protecting" people with combustion safety technology, and "pioneering" the era of motorization.
+From the era of carburetors to the present day, we have devoted ourselves to manufacturing, evolving our technology, and providing products and services related to safety and security with a focus on quality, "protecting" people's lives and the environment, and "pioneering" new paths while adapting to changes in the times.
+Mikuni promises to continue "Create, Protect, and Pioneer" and contribute to the creation of a prosperous society.
+Create
+Our foundation lies in manufacturing. With unique innovative technologies backed by tradition and craftsmanship, we will create products and services that satisfy our customers.
+Protect
+To ensure that everyone can use our products safely and securely, we will strictly comply with laws, guarantee quality, and be environmentally conscious. We will also protect the diverse individuality and lifestyles of all our employees.
+Pioneer
+With dreams in our hearts, we will strive for self-innovation and open up new possibilities, new flows, and a new world with our own hands. We will pioneer a prosperous society.
+Our Promise
+To society:
+We promise to protect a life of safety and peace of mind in nature and open up a rich future through quality-first manufacturing that considers safety and the environment.
+To our partners:
+We promise to create high-quality solutions that meet their needs while maintaining mutual trust, and together we will pioneer new business opportunities and markets.
+To our employees:
+We promise to respect diversity, protect opportunities for challenges, and create a workplace where they can blossom their dreams and lead fulfilling lives in good health.
+To ourselves:
+We promise to uphold our tradition of quality-first manufacturing with consideration for safety and the environment based on high ethical standards, generate innovations that control the next flow, and pioneer new businesses.
+
+President's Message
+On October 1, 2023, Mikuni Corporation celebrated its 100th anniversary.
+We would like to express our sincere gratitude to all our business partners, local communities, shareholders, and all other stakeholders for their continued support.
+In October 1923, shortly after the Great Kanto Earthquake, our founder, Noriyasu Ikuta, established Mikuni Shoten Partnership in Yushima, Tokyo, with the spirit of reconstructing Japan.
+Starting with the import of bicycle parts, the business shifted to the import of engine parts in anticipation of the coming automotive era and eventually expanded into manufacturing along with the wave of domestic engine production.
+Changing the products we handle in response to societal and era changes, our core businesses in manufacturing today are automotive parts for four-wheeled and two-wheeled vehicles/leisure vehicles, gas control devices, driving support devices for people with disabilities, and welfare/nursing care equipment for those who need care.
+In our trading business, which inherits the business model from our founding, we focus on aerospace parts and lawn management machines while aiming to expand into other fields.
+As these businesses grow, our domestic and overseas bases have increased, and we now have 38 bases in 11 countries and regions worldwide.
+On the occasion of our 100th anniversary, we have once again looked back on our history and re-examined what we have done and what we will do in the future.
+What has remained unchanged from our founding to the present is the belief in "contributing to the creation of a prosperous society," as stated in our corporate philosophy, and this will not change in the future.
+At the same time, we have become acutely aware of the importance of brand power.
+In the era when we were known as "Mikuni of Carburetors," what we lack today is precisely this brand power. Recognizing this, we are determined to make our brand shine again, and we have thoroughly thought about what Mikuni's brand should be.
+In this era of transformation, said to occur once in a hundred years, we are being forced to respond to global-scale issues and adapt to unprecedented changes.
+Even in such circumstances, what is the unchanging value of Mikuni?
+What is Mikuni's contribution to society?
+What is Mikuni's reason for existence?
+The answer we have arrived at is our brand message: "Create, Protect, and Pioneer."
+Our main product in the past, the carburetor, was a vital component that supported motorization at its core.
+We believe that we "created" them with expert craftsmanship, "protected" people with technology for safe combustion, and "pioneered" the motorization of society.
+From the era of carburetors to the present day, we have devoted ourselves to manufacturing while evolving technology, and by providing products and services that engage with safety and security with a commitment to quality, we have "protected" people's lives and the environment and "pioneered" new paths while adapting to changes in the times.
+We will continue to "Create, Protect, and Pioneer" and contribute to the creation of a prosperous society.
+We will position this as the core of the Mikuni brand and use it as the foundation of management to enhance our brand power.
+Returning to the spirit of our founding, it states, "Search for promising products with future potential, develop them, and nurture them."
+Looking ahead, the key will be to strengthen our competitiveness by utilizing system design concepts and digital technology and to challenge new ways of doing business, new ways of working, and new businesses and markets.
+With "Strengthening Competitiveness" and "Challenge to New Things" as the two pillars, we plan to formulate our vision and course for the next 10 years by the end of the fiscal year ending March 2024 and present it to everyone as our growth strategy toward 2033.
+We will take the first step into the next 100 years, aiming to be a company that is trusted and entrusted with peace of mind.
+
+Facilities Overview of Mikuni Odawara Business Site
+・Main Building: Houses the Development Headquarters, Quality Assurance Headquarters, and various other departments.
+・Laboratory: The first floor is equipped with engine test benches and chassis dynamometers for motorcycles. The second floor is a development base.
+・Lab Zero: An evaluation facility for four-wheeled vehicles. It has chassis dynamometer equipment that allows evaluation of four-wheeled vehicles under various conditions such as environmental temperature and driving modes.
+・R&D Building: Houses the Motor Development Department, Measurement Rooms, and Analysis Rooms.
