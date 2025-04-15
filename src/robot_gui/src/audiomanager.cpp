@@ -99,6 +99,11 @@ void AudioManager::playGreet()
     playerGreet->play();
 }
 
+void AudioManager::stopGreet()
+{
+    playerGreet->stop();
+}
+
 void AudioManager::startObstacle()
 {
     if (obstaclePath.isEmpty()) return;

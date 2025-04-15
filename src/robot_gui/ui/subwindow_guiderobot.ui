@@ -19,7 +19,7 @@
      <x>470</x>
      <y>30</y>
      <width>691</width>
-     <height>611</height>
+     <height>341</height>
     </rect>
    </property>
   </widget>
@@ -218,6 +218,16 @@
      </item>
     </layout>
    </widget>
+  </widget>
+  <widget class="QTextEdit" name="textEdit">
+   <property name="geometry">
+    <rect>
+     <x>470</x>
+     <y>400</y>
+     <width>691</width>
+     <height>241</height>
+    </rect>
+   </property>
   </widget>
  </widget>
  <resources/>

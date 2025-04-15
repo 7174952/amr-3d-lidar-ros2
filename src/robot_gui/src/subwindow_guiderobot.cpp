@@ -11,17 +11,13 @@ SubWindow_GuideRobot::SubWindow_GuideRobot(rclcpp::Node::SharedPtr node, QWidget
     initConfig();
 
     guide_robot_process = new QProcess(this);
+    chatbot_process = new QProcess(this);
 
     detect_process = new QProcess(this);
-    connect(detect_process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-            this, [=](int exitCode, QProcess::ExitStatus exitStatus){
-                Q_UNUSED(exitCode);
-                Q_UNUSED(exitStatus);
-                emit sendMessage("camera status：Stopped");
-
-            });
-    connect(detect_process, &QProcess::readyReadStandardOutput, this, &SubWindow_GuideRobot::handleOutput);
-    connect(detect_process, &QProcess::readyReadStandardError, this, &SubWindow_GuideRobot::handleError);
+#if 1 //debug_ryu
+    connect(chatbot_process, &QProcess::readyReadStandardOutput, this, &SubWindow_GuideRobot::handleOutput);
+    connect(chatbot_process, &QProcess::readyReadStandardError, this, &SubWindow_GuideRobot::handleError);
+#endif
 
     //init location and pose
     robot_cur_pose = {0,0,0,0,0,0,1};
@@ -49,6 +45,15 @@ SubWindow_GuideRobot::SubWindow_GuideRobot(rclcpp::Node::SharedPtr node, QWidget
     //load and public route path
     waypoints_pub = node_->create_publisher<nav_msgs::msg::Path>("/waypoints", 10);
     reset_client = node_->create_client<std_srvs::srv::Empty>("/reset_path");
+
+    //chatbot
+    chatbot_state_sub = node_->create_subscription<std_msgs::msg::String>(
+                "/chatbot_state", 1, std::bind(&SubWindow_GuideRobot::chatbot_state_CallBack, this, std::placeholders::_1));
+    chatbot_request = node_->create_client<std_srvs::srv::SetBool>("/chatbot_wakeup");
+    QString filePath = Global_DataSet::instance().sysPath()["ScriptPath"] + "/chatbot/chatbot.py";
+    QString pythonPath = Global_DataSet::instance().sysPath()["PyPathVoice"] + "/bin/python";
+    QString workDirectory = Global_DataSet::instance().sysPath()["ScriptPath"] + "/chatbot";
+    Utils::start_python_script(chatbot_process, pythonPath, workDirectory, filePath);
 
 
     ui->comboBox_maxVel->setCurrentText("0.6");
@@ -79,14 +84,17 @@ SubWindow_GuideRobot::SubWindow_GuideRobot(rclcpp::Node::SharedPtr node, QWidget
     audioManager->setLoopIntervalForGuide(2000);
     audioManager->setLoopIntervalForObstacle(2000);
     guide_annouse = false;
+    connect(audioManager, &AudioManager::greetFinished, this, &SubWindow_GuideRobot::onGreetVoiceFinished);
+    is_greet = false;
 
 }
 
 SubWindow_GuideRobot::~SubWindow_GuideRobot()
 {
     saveConfig();
-    Utils::terminate_process(guide_robot_process);
+    Utils::terminate_python_script(chatbot_process);
     Utils::terminate_process(detect_process);
+    Utils::terminate_process(guide_robot_process);
 
     delete ui;
 }
@@ -104,6 +112,16 @@ void SubWindow_GuideRobot::initConfig()
     bool guide_function_en = settings_navi.value("GuideFunctionEn", "false").toBool();
     ui->checkBox_cameraGuide->setChecked(guide_function_en);
     Global_DataSet::instance().setGuideFunctionEn(guide_function_en);
+
+}
+
+void SubWindow_GuideRobot::onGreetVoiceFinished()
+{
+    if(is_greet)
+    {
+        is_greet = false;
+        wakeupChatbot(true); //wakeup mode
+    }
 
 }
 
@@ -247,12 +265,14 @@ void SubWindow_GuideRobot::onSetNaviRules()
 
 void SubWindow_GuideRobot::handleOutput()
 {
-    QString output = detect_process->readAllStandardOutput();
+    QString output = chatbot_process->readAllStandardOutput();
+    qDebug() << output;
 }
 
 void SubWindow_GuideRobot::handleError()
 {
-    QString error = detect_process->readAllStandardError();
+    QString error = chatbot_process->readAllStandardError();
+    qDebug() << error;
 }
 
 void SubWindow_GuideRobot::onGuideCameraStateChanged(const int arg)
@@ -263,7 +283,10 @@ void SubWindow_GuideRobot::onGuideCameraStateChanged(const int arg)
     if(state && ui->pushButton_startRobot->isChecked())
     {
         QString filePath = Global_DataSet::instance().sysPath()["ScriptPath"] + "/person_detect.py";
-        Utils::start_python_script(detect_process, filePath);
+        QString pythonPath = Global_DataSet::instance().sysPath()["PyPathCamera"] + "/bin/python";
+        QString workDirectory = Global_DataSet::instance().sysPath()["ScriptPath"];
+
+        Utils::start_python_script(detect_process,pythonPath, workDirectory, filePath);
     }
     //stop camera
     if(!state)
@@ -271,6 +294,46 @@ void SubWindow_GuideRobot::onGuideCameraStateChanged(const int arg)
         Utils::terminate_python_script(detect_process);
     }
     ui->checkBox_cameraGuide->setEnabled(state);
+}
+
+void SubWindow_GuideRobot::chatbot_state_CallBack(const std_msgs::msg::String& msg)
+{
+    QString str = QString::fromStdString(msg.data);
+    QString state = str.left(str.indexOf(';')).split(":").at(1);
+    QString qa_msg = str.mid(str.indexOf(';') + 1);
+
+    if(state == "sleep")
+    {
+
+    }
+    else if(state == "ready")
+    {
+
+    }
+    else if(state == "wakeup")
+    {
+        audioManager->stopGreet();
+    }
+    else if(state == "question")
+    {
+        ui->textEdit->append("Q:" + qa_msg);
+    }
+    else if(state == "answer")
+    {
+        ui->textEdit->append("A:" + qa_msg);
+    }
+    else if(state == "speech")
+    {
+        audioManager->setGreetAudio(system_path["ScriptPath"] + "/chatbot/assets/speech.mp3");
+        audioManager->playGreet();
+    }
+    else
+    {
+        //do nothing
+    }
+
+    chatbot_state = state;
+    emit sendMessage("chatbot state:" + state);
 }
 
 void SubWindow_GuideRobot::obstacle_CallBack(const std_msgs::msg::Int32& msg)
@@ -438,9 +501,15 @@ void SubWindow_GuideRobot::personDetect_CallBack(const std_msgs::msg::String& ms
 void SubWindow_GuideRobot::reachedGoal_CallBack(const std_msgs::msg::Bool& msg)
 {
     reached_goal = msg.data;
-    if(reached_goal)
+    if (reached_goal)
     {
-        on_pushButton_NaviGo_toggled(false);
+        // 使用 Qt 线程安全方式调用 UI 操作
+        QMetaObject::invokeMethod(this, [this]() {
+            ui->pushButton_NaviGo->blockSignals(true);
+            ui->pushButton_NaviGo->setChecked(false);  // 设置但不触发 toggled
+            ui->pushButton_NaviGo->blockSignals(false);
+            on_pushButton_NaviGo_toggled(false);
+        }, Qt::QueuedConnection);
     }
 }
 
@@ -590,19 +659,23 @@ void SubWindow_GuideRobot::on_pushButton_startRobot_toggled(bool checked)
 
         //startup guide camera
         QString filePath = Global_DataSet::instance().sysPath()["ScriptPath"] + "/person_detect.py";
+        QString pythonPath = Global_DataSet::instance().sysPath()["PyPathCamera"] + "/bin/python";
+        QString workDirectory = Global_DataSet::instance().sysPath()["ScriptPath"];
         if(Global_DataSet::instance().sensorEnable("GuideCameraEn"))
         {
-            Utils::start_python_script(detect_process, filePath);
+            Utils::start_python_script(detect_process, pythonPath, workDirectory,filePath);
         }
 
         ui->pushButton_startRobot->setText("Robot App is Running");
         audioManager->setGreetAudio(system_path["ResourcePath"] + "/greet_startup_navi_ja.mp3");
         audioManager->playGreet();
-
+        is_greet = true;
     }
     else
     {
+        wakeupChatbot(false);
         //terminate application
+        // Utils::terminate_python_script(chatbot_process);
         Utils::terminate_python_script(detect_process);
         Utils::terminate_process(guide_robot_process);
         ui->pushButton_startRobot->setText("Press to Start Robot App");
@@ -614,6 +687,32 @@ void SubWindow_GuideRobot::on_pushButton_startRobot_toggled(bool checked)
 
 }
 
+void SubWindow_GuideRobot::wakeupChatbot(bool req)
+{
+    // 等待 service 可用
+    if (!chatbot_request->wait_for_service(std::chrono::seconds(3))) {
+        RCLCPP_ERROR(node_->get_logger(), "Service not available.");
+        return;
+    }
+
+    // 发起请求
+    auto request = std::make_shared<std_srvs::srv::SetBool::Request>();
+    request->data = req;  // 请求数据
+
+    // 调用服务
+    auto future = chatbot_request->async_send_request(request);
+
+    if (rclcpp::spin_until_future_complete(node_, future) == rclcpp::FutureReturnCode::SUCCESS)
+    {
+        RCLCPP_INFO(node_->get_logger(), "Set chatbot ready");
+    }
+    else
+    {
+        RCLCPP_WARN(node_->get_logger(), "Set chatbot failed.");
+        QMessageBox::warning(this,"Warning","Set chatbot failed.");
+    }
+
+}
 
 void SubWindow_GuideRobot::on_pushButton_NaviGo_toggled(bool checked)
 {
@@ -670,6 +769,7 @@ void SubWindow_GuideRobot::on_pushButton_NaviGo_toggled(bool checked)
         rule_state.cnt = 0;
         rule_state.status = "out";
 
+        wakeupChatbot(false); //sleep mode
         ui->pushButton_NaviGo->setText("Moving to " + navi_target);
         audioManager->setGreetAudio(system_path["ResourcePath"] + "/goto_next_target_ja.mp3");
         audioManager->playGreet();
@@ -677,12 +777,14 @@ void SubWindow_GuideRobot::on_pushButton_NaviGo_toggled(bool checked)
     }
     else
     {
-        //terminate application
         ui->pushButton_NaviGo->setText("GO");
+        ui->pushButton_NaviGo->blockSignals(true);
         ui->pushButton_NaviGo->setChecked(false);
+        ui->pushButton_NaviGo->blockSignals(false);
+
         audioManager->setGreetAudio(system_path["ResourcePath"] + "/essay/" + navi_target + "_ja.mp3");
         audioManager->playGreet();
-
+        wakeupChatbot(true);  // 唤醒模式
     }
 }
 

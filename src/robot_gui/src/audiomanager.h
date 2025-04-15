@@ -20,6 +20,7 @@ public:
     void setLoopIntervalForGuide(int ms);
 
     void playGreet();
+    void stopGreet();
     void startObstacle();
     void stopObstacle();
     void startGuide();

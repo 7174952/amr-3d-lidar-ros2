@@ -28,6 +28,7 @@
 #include <visualization_msgs/msg/marker.hpp>
 #include <std_msgs/msg/bool.hpp>
 #include <std_srvs/srv/empty.hpp>
+#include <std_srvs/srv/set_bool.hpp>
 #include <std_msgs/msg/int32.hpp>
 
 #include "utils.h"
@@ -149,6 +150,7 @@ signals:
 public slots:
      void updateMapName(const QString& newMapName);
      void onGuideCameraStateChanged(const int arg);
+     void onGreetVoiceFinished();
 #if 1 //debug_ryu
      void handleOutput();
      void handleError();
@@ -169,10 +171,13 @@ private:
     void reachedGoal_CallBack(const std_msgs::msg::Bool& msg);
     void personDetect_CallBack(const std_msgs::msg::String& msg);
     void obstacle_CallBack(const std_msgs::msg::Int32& msg);
+    void chatbot_state_CallBack(const std_msgs::msg::String& msg);
     void upload_RouteList();
     void upload_LocationList();
     void saveConfig();
     void initConfig();
+    void wakeupChatbot(bool req);
+
 
 private:
     rclcpp::Node::SharedPtr node_;
@@ -180,6 +185,7 @@ private:
     QProcess* guide_robot_process;
     QVector<double> last_point;
     QProcess* detect_process;
+    QProcess* chatbot_process;
 
     //define location
     struct Robot_Position
@@ -266,6 +272,10 @@ private:
     QMap<QString, QString> system_path;
     int32_t obstacle_points_num;
     bool guide_annouse;
+    bool is_greet;
+
+    //chatbot
+    QString chatbot_state;
 
 private:
     Ui::SubWindow_GuideRobot *ui;
@@ -277,7 +287,8 @@ private:
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr reached_goal_sub;
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr person_detect_sub;
     rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr obstacle_num_sub;
-
+    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr chatbot_state_sub;
+    rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr chatbot_request;
 
     rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr waypoints_pub;
     rclcpp::Client<std_srvs::srv::Empty>::SharedPtr reset_client;

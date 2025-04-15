@@ -29,7 +29,7 @@ public:
     static void start_process(QProcess *, QString, QString);
     static void terminate_process(QProcess *);
     static QString execute_shell_cmd(QString);
-    static void start_python_script(QProcess *, QString);
+    static void start_python_script(QProcess *, QString, QString, QString);
     static void terminate_python_script(QProcess *);
 
     static QVector3D transformWaypointToRobotFrame3D(const QVector3D&, double , const QVector3D& );

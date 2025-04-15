@@ -38,14 +38,12 @@ QString Utils::execute_shell_cmd(QString shell)
     return Result;
 }
 
-void Utils::start_python_script(QProcess *pyProcess, QString pyFileName)
+void Utils::start_python_script(QProcess *pyProcess, QString pythonPath, QString workDirectory, QString pyFileName)
 {
     if (pyProcess->state() == QProcess::Running)
     {
         return;
     }
-
-    QString pythonPath = Global_DataSet::instance().sysPath()["PyPathCamera"] + "/bin/python";
 
     QStringList arguments;
     arguments << pyFileName;
@@ -55,7 +53,7 @@ void Utils::start_python_script(QProcess *pyProcess, QString pyFileName)
     pyProcess->setProcessEnvironment(env);
     pyProcess->setProgram(pythonPath);
     pyProcess->setArguments(arguments);
-    pyProcess->setWorkingDirectory(Global_DataSet::instance().sysPath()["ScriptPath"]);
+    pyProcess->setWorkingDirectory(workDirectory);
 
     pyProcess->start();
 
