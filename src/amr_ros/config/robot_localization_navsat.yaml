@@ -1,8 +1,0 @@
-navsat_transform_node:
-  ros__parameters:
-    frequency: 10.0
-    wait_for_datum: true
-    use_odometry_yaw: true       # 如果有较准确的IMU数据，可以设置为false，由IMU提供偏航
-    yaw_offset: 0.0
-    delay: 0.0
-    datum: [35.2907447, 139.14338229999998, 0.0]
