@@ -10,11 +10,22 @@ from launch_ros.parameter_descriptions import ParameterValue
 
 def generate_launch_description():
     # 获取参数文件的路径
-    pointcloud_to_scan_param_file_path = os.path.join(
+    gnss_param_file_path = os.path.join(
         get_package_share_directory('amr_ros'),
         'config',
-        'pointcloud_to_laserscan.yaml'
+        'zed_f9p.yaml'
     )
+    robot_localization_param_file_path = os.path.join(
+        get_package_share_directory('amr_ros'),
+        'config',
+        'mapping_navsat.yaml'
+    )
+    gnss_ekf_param_file_path = os.path.join(
+        get_package_share_directory('amr_ros'),
+        'config',
+        'mapping_ekf.yaml'
+    )
+
 
     save_pcd_dir_arg = DeclareLaunchArgument(
         'savePCDDirectory',
@@ -51,38 +62,47 @@ def generate_launch_description():
         ]
     )
 
-    # pointcloud_to_scan_node = TimerAction(
-    #     period=5.0,  # 延时5秒
-    #     actions=[
-    #         Node(
-    #             package='pointcloud_to_laserscan',
-    #             executable='pointcloud_to_laserscan_node',
-    #             name='pointcloud_to_laserscan',
-    #             remappings=[('cloud_in', '/lio_sam/deskew/cloud_deskewed')],
-    #             parameters=[pointcloud_to_scan_param_file_path]
-    #         )
-    #     ]
-    # )
+    ublox_gps_node = Node(package='ublox_gps',
+                        executable='ublox_gps_node',
+                        output='both',
+                        parameters=[gnss_param_file_path]
+                )
 
-    # slam_toolbox_launch = TimerAction(
-    #     period=10.0,  # 延时5秒
-    #     actions=[
-    #         IncludeLaunchDescription(
-    #             PythonLaunchDescriptionSource(
-    #                 os.path.join(
-    #                     get_package_share_directory('amr_ros'),  # 这里替换成包含子launch文件的包名
-    #                     'launch/include',
-    #                     'slam_toolbox.launch.py'
-    #                 )
-    #             )
-    #         )
-    #     ]
-    # )
+    gnss_ekf =  TimerAction(
+        period=5.0, #delay 5s
+        actions=[
+            Node(
+                package='robot_localization',
+                executable='ekf_node',
+                name='ekf_filter_node',
+                output='screen',
+                parameters=[gnss_ekf_param_file_path]
+            )
+        ]
+    )
+
+    navsat_location_node = TimerAction(
+        period=5.0, #delay 5s
+        actions=[
+            Node(
+                package='robot_localization',
+                executable='navsat_transform_node',
+                name='navsat_transform_node',
+                output='screen',
+                parameters=[robot_localization_param_file_path],
+                remappings=[
+                    ('/gps/fix', '/fix')
+                ]
+            )
+        ]
+    )
 
     return LaunchDescription([
         save_pcd_dir_arg,
         livox_driver2_launch,
+        ublox_gps_node,
         lio_sam_launch,
-        # pointcloud_to_scan_node,
-        # slam_toolbox_launch
+        gnss_ekf,
+        navsat_location_node,
+
     ])
