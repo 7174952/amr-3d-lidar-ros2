@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1208</width>
-    <height>723</height>
+    <height>749</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,53 +16,126 @@
   <widget class="QGraphicsView" name="graphicsView">
    <property name="geometry">
     <rect>
-     <x>130</x>
+     <x>390</x>
      <y>50</y>
-     <width>961</width>
-     <height>521</height>
+     <width>751</width>
+     <height>611</height>
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_StartMap">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
+  <widget class="QGroupBox" name="groupBox_Config">
    <property name="geometry">
     <rect>
-     <x>330</x>
-     <y>610</y>
-     <width>261</width>
-     <height>81</height>
+     <x>30</x>
+     <y>30</y>
+     <width>331</width>
+     <height>631</height>
     </rect>
    </property>
-   <property name="styleSheet">
-    <string notr="true">font: 12pt &quot;Sans Serif&quot;;</string>
+   <property name="title">
+    <string>Config</string>
    </property>
-   <property name="text">
-    <string>Press to Start Make Map App</string>
-   </property>
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButton_saveMap">
-   <property name="geometry">
-    <rect>
-     <x>690</x>
-     <y>620</y>
-     <width>141</width>
-     <height>71</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">font: 12pt &quot;Sans Serif&quot;;</string>
-   </property>
-   <property name="text">
-    <string>Save Map</string>
-   </property>
+   <widget class="QWidget" name="verticalLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>40</y>
+      <width>291</width>
+      <height>581</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <layout class="QFormLayout" name="formLayout">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_mapWithGnss">
+         <property name="text">
+          <string>Mapping with Gnss</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QCheckBox" name="checkBox_mapWithGnss">
+         <property name="text">
+          <string>Enable</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QTextEdit" name="textEdit_mapStatus"/>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_5">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton_StartMap">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font: 14pt &quot;Sans Serif&quot;;</string>
+       </property>
+       <property name="text">
+        <string>Press to Start Make Map App</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton_saveMap">
+       <property name="styleSheet">
+        <string notr="true">font: 14pt &quot;Sans Serif&quot;;</string>
+       </property>
+       <property name="text">
+        <string>Save Map</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
   </widget>
  </widget>
  <resources/>

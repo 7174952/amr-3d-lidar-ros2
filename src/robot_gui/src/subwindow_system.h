@@ -55,6 +55,7 @@ private:
     Ui::SubWindow_System *ui;
     QMap<QString, QString> system_path;
     QMap<QString, QString> robot_size;
+    QMap<QString, QString> gnss_ntrip;
 };
 
 #endif // SUBWINDOW_SYSTEM_H

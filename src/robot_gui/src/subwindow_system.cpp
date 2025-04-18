@@ -35,7 +35,11 @@ void SubWindow_System::initConfig()
     ui->lineEdit_robotHeight->setText(robot_size["RobotHeight"]);
     ui->lineEdit_obstTolerance->setText(robot_size["RobotWidthTole"]);
 
-
+    gnss_ntrip = Global_DataSet::instance().gnssNtrip();
+    ui->comboBox_ntripSite->setCurrentText(gnss_ntrip["NtripSite"]);
+    ui->comboBox_accessPort->setCurrentText(gnss_ntrip["NtripPort"]);
+    ui->comboBox_mountPoint->setCurrentText(gnss_ntrip["NtripMountPoint"]);
+    ui->lineEdit_password->setText(gnss_ntrip["NtripPassword"]);
 }
 
 void SubWindow_System::saveConfig()
@@ -81,8 +85,21 @@ void SubWindow_System::saveConfig()
      settings_size.setValue("RobotWidth", robot_size["RobotWidth"]);
      settings_size.setValue("RobotHeight", robot_size["RobotHeight"]);
      settings_size.setValue("RobotWidthTole", robot_size["RobotWidthTole"]);
-
      Global_DataSet::instance().setRobotSize(robot_size);
+
+     //save all ntrip info
+     QSettings settings_ntrip("mikuni", "GuideRobot/ntrip");
+     gnss_ntrip["NtripSite"] = ui->comboBox_ntripSite->currentText();
+     gnss_ntrip["NtripPort"] = ui->comboBox_accessPort->currentText();
+     gnss_ntrip["NtripMountPoint"] = ui->comboBox_mountPoint->currentText();
+     gnss_ntrip["NtripPassword"] = ui->lineEdit_password->text();
+
+     settings_ntrip.setValue("NtripSite", gnss_ntrip["NtripSite"]);
+     settings_ntrip.setValue("NtripPort", gnss_ntrip["NtripPort"]);
+     settings_ntrip.setValue("NtripMountPoint", gnss_ntrip["NtripMountPoint"]);
+     settings_ntrip.setValue("NtripPassword", gnss_ntrip["NtripPassword"]);
+     Global_DataSet::instance().setGnssNtrip(gnss_ntrip);
+
 
 }
 

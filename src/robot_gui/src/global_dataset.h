@@ -31,6 +31,8 @@ public:
     void setGuideFunctionEn(const bool enable);
     bool guideFunctionEn() const;
 
+    void setGnssNtrip(const QMap<QString, QString>& gnss_ntrip);
+    QMap<QString, QString> gnssNtrip() const;
 
 private:
     Global_DataSet();   // 私有构造函数
@@ -47,6 +49,7 @@ private:
     bool m_debugMode;
     QMap<QString, bool> m_sensorEnable;
     bool m_guideFunctionEn;
+    QMap<QString, QString> m_gnssNtrip;
 
 
 };

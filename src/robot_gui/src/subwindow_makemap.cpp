@@ -9,6 +9,7 @@ SubWindow_MakeMap::SubWindow_MakeMap(rclcpp::Node::SharedPtr node, QWidget *pare
 
     ros_make_map_process = new QProcess(this);;
     ros_manual_process = new QProcess(this);
+    gnss_visual_process = new QProcess(this);
 
 }
 
@@ -16,6 +17,7 @@ SubWindow_MakeMap::~SubWindow_MakeMap()
 {
     Utils::terminate_process(ros_manual_process);
     Utils::terminate_process(ros_make_map_process);
+    Utils::terminate_python_script(gnss_visual_process);
     delete ui;
 }
 
@@ -81,8 +83,17 @@ void SubWindow_MakeMap::on_pushButton_StartMap_toggled(bool checked)
 
         Utils::start_process(ros_make_map_process, "amr_ros", "om_map_liosam.launch.py savePCDDirectory:=" + pcdPath);
         Utils::start_process(ros_manual_process, "amr_ros", "om_manual.launch.py");
-
         ui->pushButton_StartMap->setText("Make Route App is Running");
+
+        if(Global_DataSet::instance().sensorEnable("GnssEn"))
+        {
+            QString filePath = Global_DataSet::instance().sysPath()["ScriptPath"] + "/gps_visualizer.py";
+            QString pythonPath = "/bin/python3";
+            QString workDirectory = Global_DataSet::instance().sysPath()["ScriptPath"];
+
+            Utils::start_python_script(gnss_visual_process, pythonPath, workDirectory,filePath);
+        }
+
 
     }
     else
@@ -90,6 +101,7 @@ void SubWindow_MakeMap::on_pushButton_StartMap_toggled(bool checked)
         //end of make map
         Utils::terminate_process(ros_manual_process);
         Utils::terminate_process(ros_make_map_process);
+        Utils::terminate_python_script(gnss_visual_process);
         ui->pushButton_StartMap->setText("Press to Start Make Map App");
     }
 
@@ -102,7 +114,7 @@ void SubWindow_MakeMap::on_pushButton_saveMap_clicked()
     // 执行ros2服务调用命令
     proc.start("ros2", QStringList() << "service" << "call" << "/lio_sam/save_map" << "lio_sam/srv/SaveMap");
     // 等待执行完成，设置超时时间为5秒
-    if (!proc.waitForFinished(5000))
+    if (!proc.waitForFinished(30000))
     {
         qDebug() << "执行超时或失败";
         QMessageBox::warning(this,"Warning","Save *.pcd map Timeout");
@@ -121,7 +133,8 @@ void SubWindow_MakeMap::on_pushButton_saveMap_clicked()
     else
     {
         qDebug() << "调用服务成功，返回结果：" << output;
-        sendMessage("Save PCD Map Success");
+        ui->textEdit_mapStatus->append("Save Map Success");
     }
 }
+
 

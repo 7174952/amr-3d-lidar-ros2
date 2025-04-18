@@ -33,6 +33,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->lineEdit_BatVolt->setText("0.0");
     ui->lineEdit_BatCurr->setText("0.0");
     ui->lineEdit_LineSpeed->setText("0.0");
+
+    // show gnss ntrip status
+    connect(&gnss_rtk_process, &QProcess::readyReadStandardOutput,
+            this,  &MainWindow::handleOutput);
+    connect(&gnss_rtk_process, &QProcess::errorOccurred,
+            this,  &MainWindow::handleError);
+
 }
 
 MainWindow::~MainWindow()
@@ -65,6 +72,14 @@ void MainWindow::initConfig()
     QDir dir(sys_path["MapPath"]);
     QStringList subdirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
     ui->comboBox_MapFolder->addItems(subdirs);
+
+    QSettings settings_ntrip("mikuni", "GuideRobot/ntrip");
+    QMap<QString, QString> gnss_ntrip;
+    gnss_ntrip["NtripSite"] = settings_ntrip.value("NtripSite", "").toString();
+    gnss_ntrip["NtripPort"] = settings_ntrip.value("NtripPort", "2101").toString();
+    gnss_ntrip["NtripMountPoint"] = settings_ntrip.value("NtripMountPoint", "").toString();
+    gnss_ntrip["NtripPassword"] = settings_ntrip.value("NtripPassword", "").toString();
+    Global_DataSet::instance().setGnssNtrip(gnss_ntrip);
 
     QSettings settings_navi("mikuni", "GuideRobot/Navi");
     QString curr_mapName = settings_navi.value("CurrentMapName", "").toString();
@@ -146,8 +161,6 @@ void MainWindow::cartStatus_CallBack(const om_cart::msg::Status& status)
     {
         ui->lineEdit_LineSpeed->setText(QString::number(tmp_val * 3.6,'f',2));
     }
-
-
 }
 
 void MainWindow::on_action_Manual_Control_triggered()
@@ -292,4 +305,58 @@ void MainWindow::on_action_Debug_Enable_triggered(bool checked)
     Global_DataSet::instance().setDebugMode(checked);
 }
 
+void MainWindow::handleOutput()
+{
+    QString output = gnss_rtk_process.readAllStandardOutput();
+    qDebug() << output;
+    ui->statusBar_main->showMessage(output);
+}
+
+void MainWindow::handleError()
+{
+    QString error = gnss_rtk_process.readAllStandardError();
+    qDebug() << error;
+    ui->statusBar_main->showMessage(error);
+}
+
+void MainWindow::on_checkBox_GnssSensor_stateChanged(int arg1)
+{
+    bool checked = (arg1 == 2) ? true:false;
+    Global_DataSet::instance().setSensorEnable("GnssEn", checked);
+
+    if(checked)
+    {
+        QString ntripSite = Global_DataSet::instance().gnssNtrip()["NtripSite"];
+        QString ntripPort = Global_DataSet::instance().gnssNtrip()["NtripPort"];
+        QString ntripMountPoint = Global_DataSet::instance().gnssNtrip()["NtripMountPoint"].split("-").at(0);
+        QString ntripPassword = Global_DataSet::instance().gnssNtrip()["NtripPassword"];
+
+        gnss_rtk_process.setProgram("str2str");
+        if(ntripSite.contains("ntrip1"))
+        {
+            gnss_rtk_process.setArguments({
+                "-in",  "ntrip://" + ntripSite + ":" + ntripPort + "/" + ntripMountPoint,
+                "-out", "serial://ttyACM-gnss:38400:8:n:1"
+            });
+        }
+        else
+        {
+            gnss_rtk_process.setArguments({
+                "-in",  "ntrip://user@gmail.com:" + ntripPassword + "@" + ntripSite + ":" + ntripPort + "/" + ntripMountPoint,
+                "-out", "serial://ttyACM-gnss:38400:8:n:1"
+            });
+        }
+
+        // 把 stdout / stderr 合并，便于一次性读取
+        gnss_rtk_process.setProcessChannelMode(QProcess::MergedChannels);
+
+        gnss_rtk_process.start();
+    }
+    else
+    {
+        if(gnss_rtk_process.state() != QProcess::NotRunning)
+            gnss_rtk_process.terminate();
+    }
+
+}
 

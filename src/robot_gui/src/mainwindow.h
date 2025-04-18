@@ -53,6 +53,8 @@ signals:
 
 private slots:
       void showMessageInStatusBar(const QString &message);
+      void handleOutput();
+      void handleError();
 
 private slots:
     void onManualControlClosed();
@@ -88,6 +90,8 @@ private slots:
   void on_action_Guide_Robot_triggered();
 
   void on_action_Debug_Enable_triggered(bool checked);
+
+  void on_checkBox_GnssSensor_stateChanged(int arg1);
 
 private:
   void cartStatus_CallBack(const om_cart::msg::Status& status);
@@ -145,6 +149,7 @@ private:
   Ui::MainWindow *ui;
 
   QProcess* robot_driver_process;
+  QProcess gnss_rtk_process;
 
 };
 

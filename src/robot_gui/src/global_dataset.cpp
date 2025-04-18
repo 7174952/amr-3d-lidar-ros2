@@ -41,6 +41,17 @@ void Global_DataSet::setRobotSize(const QMap<QString, QString>& robot_size)
     m_robotSize = robot_size;
 }
 
+void Global_DataSet::setGnssNtrip(const QMap<QString, QString>& gnss_ntrip)
+{
+    m_gnssNtrip = gnss_ntrip;
+}
+
+
+QMap<QString, QString> Global_DataSet::gnssNtrip() const
+{
+    return m_gnssNtrip;
+}
+
 QMap<QString, QString> Global_DataSet::robotSize() const
 {
     return m_robotSize;

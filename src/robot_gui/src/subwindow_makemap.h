@@ -49,6 +49,7 @@ private:
     rclcpp::Node::SharedPtr node_;
     QProcess* ros_make_map_process;
     QProcess* ros_manual_process;
+    QProcess* gnss_visual_process;
 
 private:
     Ui::SubWindow_MakeMap *ui;
