@@ -19,6 +19,11 @@ def generate_launch_description():
         description='Directory to save PCD maps'
     )
 
+    gpsCovThreshold_arg = DeclareLaunchArgument(
+        'gpsCovThreshold',
+        default_value='0.5'
+    )
+
     params_declare = DeclareLaunchArgument(
         'params_file',
         default_value=os.path.join(
@@ -30,6 +35,7 @@ def generate_launch_description():
     return LaunchDescription([
         params_declare,
         save_pcd_dir_arg,
+        gpsCovThreshold_arg,
         Node(
             package='tf2_ros',
             executable='static_transform_publisher',
@@ -79,7 +85,8 @@ def generate_launch_description():
             executable='lio_sam_mapOptimization',
             name='lio_sam_mapOptimization',
             parameters=[parameter_file,
-            {'savePCDDirectory': LaunchConfiguration('savePCDDirectory')}],
+            {'savePCDDirectory': LaunchConfiguration('savePCDDirectory'),
+             'gpsCovThreshold': LaunchConfiguration('gpsCovThreshold')}],
             output='screen'
         ),
         Node(
