@@ -48,8 +48,8 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 17.901578903198242
-        Min Value: -4.112936019897461
+        Max Value: 13.789054870605469
+        Min Value: -2.895517110824585
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -101,8 +101,6 @@ Visualization Manager:
           Value: true
         odom:
           Value: true
-        utm:
-          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
@@ -120,8 +118,6 @@ Visualization Manager:
                     {}
               livox_frame:
                 {}
-            utm:
-              {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -238,6 +234,19 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /gps_path
       Value: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Marker
+      Namespaces:
+        {}
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /geo_marker
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -284,7 +293,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 11.000600814819336
+      Distance: 23.926780700683594
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -299,10 +308,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.8847970366477966
+      Pitch: 1.524796485900879
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.937243461608887
+      Yaw: 0.3290650546550751
     Saved: ~
 Window Geometry:
   Displays:
