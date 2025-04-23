@@ -7,6 +7,7 @@ from ament_index_python.packages import get_package_share_directory
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 from launch_ros.parameter_descriptions import ParameterValue
+from launch.conditions import IfCondition
 
 def generate_launch_description():
     # 获取参数文件的路径
@@ -32,6 +33,10 @@ def generate_launch_description():
         default_value='/Downloads/LOAM/',
         description='Custom directory for saving PCD maps'
     )
+    gpsCovThreshold_arg = DeclareLaunchArgument(
+        'gpsCovThreshold',
+        default_value='0.05'
+    )
 
     # 引用子launch文件
     livox_driver2_launch = IncludeLaunchDescription(
@@ -56,17 +61,14 @@ def generate_launch_description():
                     )
                 ),
                 launch_arguments={
-                    'savePCDDirectory': LaunchConfiguration('savePCDDirectory')
+                    'savePCDDirectory': LaunchConfiguration('savePCDDirectory'),
+                    'gpsCovThreshold': LaunchConfiguration('gpsCovThreshold')
                 }.items()
             )
         ]
     )
 
-    ublox_gps_node = Node(package='ublox_gps',
-                        executable='ublox_gps_node',
-                        output='both',
-                        parameters=[gnss_param_file_path]
-                )
+    enable_gnss = LaunchConfiguration('enable_gnss')
 
     gnss_ekf =  TimerAction(
         period=5.0, #delay 5s
@@ -76,6 +78,7 @@ def generate_launch_description():
                 executable='ekf_node',
                 name='ekf_filter_node',
                 output='screen',
+                condition=IfCondition(enable_gnss),
                 parameters=[gnss_ekf_param_file_path]
             )
         ]
@@ -89,7 +92,15 @@ def generate_launch_description():
                 executable='navsat_transform_node',
                 name='navsat_transform_node',
                 output='screen',
-                parameters=[robot_localization_param_file_path],
+                condition=IfCondition(enable_gnss),
+                parameters=[robot_localization_param_file_path,
+                            {
+                            'datum.latitude': LaunchConfiguration('latitude'),
+                            'datum.longitude': LaunchConfiguration('longitude'),
+                            'datum.altitude': LaunchConfiguration('altitude'),
+                            'yaw_offset': LaunchConfiguration('yaw_offset'),
+                    }
+                ],
                 remappings=[
                     ('/gps/fix', '/fix')
                 ]
@@ -98,9 +109,14 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        DeclareLaunchArgument('enable_gnss',default_value='true'),
+        DeclareLaunchArgument('latitude', default_value='35.0'),
+        DeclareLaunchArgument('longitude', default_value='135.0'),
+        DeclareLaunchArgument('altitude', default_value='0.0'),
+        DeclareLaunchArgument("yaw_offset", default_value="0.0"),
         save_pcd_dir_arg,
+        gpsCovThreshold_arg,
         livox_driver2_launch,
-        ublox_gps_node,
         lio_sam_launch,
         gnss_ekf,
         navsat_location_node,
