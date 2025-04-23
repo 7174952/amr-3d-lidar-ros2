@@ -10,6 +10,9 @@
 #include <QDir>
 #include <cmath>
 #include <QDebug>
+#include <QTextEdit>
+#include <QMetaObject>
+#include <QVector3D>
 
 #include "global_dataset.h"
 #include <LinearMath/btMatrix3x3.h>
@@ -17,10 +20,20 @@
 #include <rclcpp/rclcpp.hpp>
 #include <nav_msgs/msg/path.hpp>
 #include <tf2/LinearMath/Quaternion.h>
+#include <nav_msgs/msg/odometry.hpp>
 
+#include <rclcpp/rclcpp.hpp>
+#include <robot_localization/srv/set_datum.hpp>
+#include <robot_localization/srv/from_ll.hpp>
+#include <robot_localization/srv/to_ll.hpp>
+#include <geometry_msgs/msg/point_stamped.hpp>
+#include <geometry_msgs/msg/point.hpp>
+#include <geographic_msgs/msg/geo_point.hpp>
+#include <visualization_msgs/msg/marker.hpp>
 
 namespace Ui {
     class Utils;
+    class GeoServiceTool;
 }
 
 class Utils
@@ -47,6 +60,33 @@ private:
     Utils() = delete;
     ~Utils() = delete;
 
+};
+
+class GeoServiceTool
+{
+public:
+    GeoServiceTool(rclcpp::Node::SharedPtr node, QTextEdit* textEdit_geoShowMsg);
+
+    void setDatum(double lat, double lon, double alt);
+    void fromLL(double lat, double lon, double alt);
+    void handleClickedPoint(const geometry_msgs::msg::PointStamped::SharedPtr msg);
+    void odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
+    QVector3D getCurrMapToLL();
+
+private:
+    rclcpp::Node::SharedPtr node_;
+    rclcpp::Client<robot_localization::srv::SetDatum>::SharedPtr datum_client_;
+    rclcpp::Client<robot_localization::srv::FromLL>::SharedPtr fromll_client_;
+    rclcpp::Client<robot_localization::srv::ToLL>::SharedPtr toll_client_;
+    rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_pub_;
+    rclcpp::Subscription<geometry_msgs::msg::PointStamped>::SharedPtr clicked_sub_;
+    rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
+
+    QTextEdit* textEdit_geoShowMsg_;
+    QVector3D currOdom;
+    QVector3D currLL;
+
+    void publishMarker(const geometry_msgs::msg::Point &point);
 };
 
 #endif // UTILS_H

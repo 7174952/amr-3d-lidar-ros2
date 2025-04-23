@@ -40,6 +40,7 @@ void SubWindow_System::initConfig()
     ui->comboBox_accessPort->setCurrentText(gnss_ntrip["NtripPort"]);
     ui->comboBox_mountPoint->setCurrentText(gnss_ntrip["NtripMountPoint"]);
     ui->lineEdit_password->setText(gnss_ntrip["NtripPassword"]);
+    ui->lineEdit_convThreshold->setText(gnss_ntrip["ConvThreshold"]);
 }
 
 void SubWindow_System::saveConfig()
@@ -93,11 +94,14 @@ void SubWindow_System::saveConfig()
      gnss_ntrip["NtripPort"] = ui->comboBox_accessPort->currentText();
      gnss_ntrip["NtripMountPoint"] = ui->comboBox_mountPoint->currentText();
      gnss_ntrip["NtripPassword"] = ui->lineEdit_password->text();
+     gnss_ntrip["ConvThreshold"] = ui->lineEdit_convThreshold->text();
 
      settings_ntrip.setValue("NtripSite", gnss_ntrip["NtripSite"]);
      settings_ntrip.setValue("NtripPort", gnss_ntrip["NtripPort"]);
      settings_ntrip.setValue("NtripMountPoint", gnss_ntrip["NtripMountPoint"]);
      settings_ntrip.setValue("NtripPassword", gnss_ntrip["NtripPassword"]);
+     settings_ntrip.setValue("ConvThreshold", gnss_ntrip["ConvThreshold"]);
+
      Global_DataSet::instance().setGnssNtrip(gnss_ntrip);
 
 

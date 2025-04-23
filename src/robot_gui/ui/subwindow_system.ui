@@ -39,7 +39,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>2</number>
    </property>
    <widget class="QWidget" name="tab_Path">
     <attribute name="title">
@@ -337,109 +337,157 @@
    </widget>
    <widget class="QWidget" name="tab_GnssNtrip">
     <attribute name="title">
-     <string>Gnss Ntrip</string>
+     <string>Gnss RTK</string>
     </attribute>
-    <widget class="QWidget" name="verticalLayoutWidget">
+    <widget class="QGroupBox" name="groupBox_ntrip">
      <property name="geometry">
       <rect>
-       <x>60</x>
+       <x>30</x>
        <y>30</y>
-       <width>611</width>
-       <height>341</height>
+       <width>351</width>
+       <height>251</height>
       </rect>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <layout class="QFormLayout" name="formLayout_3">
-        <item row="0" column="1">
-         <widget class="QComboBox" name="comboBox_ntripSite">
-          <property name="editable">
-           <bool>false</bool>
-          </property>
-          <item>
-           <property name="text">
-            <string>ntrip1.bizstation.jp</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>rtk2go.com</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_ntripSite">
+     <property name="title">
+      <string>Ntrip </string>
+     </property>
+     <widget class="QWidget" name="">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>331</width>
+        <height>201</height>
+       </rect>
+      </property>
+      <layout class="QFormLayout" name="formLayout_3">
+       <item row="0" column="1">
+        <widget class="QComboBox" name="comboBox_ntripSite">
+         <property name="editable">
+          <bool>false</bool>
+         </property>
+         <item>
           <property name="text">
-           <string>Ntrip Site</string>
+           <string>ntrip1.bizstation.jp</string>
           </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_accessPort">
+         </item>
+         <item>
           <property name="text">
-           <string>Port</string>
+           <string>rtk2go.com</string>
           </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QComboBox" name="comboBox_accessPort">
-          <item>
-           <property name="text">
-            <string>2101</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_mountPoint">
+         </item>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_ntripSite">
+         <property name="text">
+          <string>Ntrip Site</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_accessPort">
+         <property name="text">
+          <string>Port</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QComboBox" name="comboBox_accessPort">
+         <item>
           <property name="text">
-           <string>Mount Point</string>
+           <string>2101</string>
           </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_password">
+         </item>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_mountPoint">
+         <property name="text">
+          <string>Mount Point</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_password">
+         <property name="text">
+          <string>Password</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="lineEdit_password"/>
+       </item>
+       <item row="2" column="1">
+        <widget class="QComboBox" name="comboBox_mountPoint">
+         <item>
           <property name="text">
-           <string>Password</string>
+           <string>B49FE98A - 静岡県沼津市(ntrip1)</string>
           </property>
-         </widget>
-        </item>
-        <item row="3" column="1">
-         <widget class="QLineEdit" name="lineEdit_password"/>
-        </item>
-        <item row="2" column="1">
-         <widget class="QComboBox" name="comboBox_mountPoint">
-          <item>
-           <property name="text">
-            <string>B49FE98A - 静岡県沼津市(ntrip1)</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>B4A00B46 - 横浜市西区(ntrip1)</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>981FD39A - 山梨県富士河口湖町(ntrip1)</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>B49FE586 - 山梨県南巨摩郡(ntrip1)</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>mikuni_odawara - 小田原ミクニ(rtk2go)</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
+         </item>
+         <item>
+          <property name="text">
+           <string>B4A00B46 - 横浜市西区(ntrip1)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>981FD39A - 山梨県富士河口湖町(ntrip1)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>B49FE586 - 山梨県南巨摩郡(ntrip1)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>mikuni_odawara - 小田原ミクニ(rtk2go)</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_rtkClient">
+     <property name="geometry">
+      <rect>
+       <x>400</x>
+       <y>30</y>
+       <width>361</width>
+       <height>251</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>RTK Client</string>
+     </property>
+     <widget class="QWidget" name="formLayoutWidget_3">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>341</width>
+        <height>201</height>
+       </rect>
+      </property>
+      <layout class="QFormLayout" name="formLayout_4">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_conv_threshold">
+         <property name="text">
+          <string>Conv Threshold</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="lineEdit_convThreshold">
+         <property name="text">
+          <string>0.05</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </widget>
    <widget class="QWidget" name="tab_Lang">

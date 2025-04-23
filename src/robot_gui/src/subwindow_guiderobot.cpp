@@ -503,13 +503,7 @@ void SubWindow_GuideRobot::reachedGoal_CallBack(const std_msgs::msg::Bool& msg)
     reached_goal = msg.data;
     if (reached_goal)
     {
-        // 使用 Qt 线程安全方式调用 UI 操作
-        QMetaObject::invokeMethod(this, [this]() {
-            ui->pushButton_NaviGo->blockSignals(true);
-            ui->pushButton_NaviGo->setChecked(false);  // 设置但不触发 toggled
-            ui->pushButton_NaviGo->blockSignals(false);
-            on_pushButton_NaviGo_toggled(false);
-        }, Qt::QueuedConnection);
+        ui->pushButton_NaviGo->setChecked(false);
     }
 }
 

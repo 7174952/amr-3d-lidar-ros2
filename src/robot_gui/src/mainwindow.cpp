@@ -29,6 +29,16 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QObject::connect(ui->action_Exit, &QAction::triggered, this, &QApplication::quit);
 
+    gnss_fix_sub = node_->create_subscription<sensor_msgs::msg::NavSatFix>(
+            "/fix", 10,
+            std::bind(&MainWindow::gnssFix_Callback, this, std::placeholders::_1));
+    connect(this, &MainWindow::newFixReceived, this, &MainWindow::onNewFixReceived);
+
+    gnss_vel_sub = node_->create_subscription<geometry_msgs::msg::TwistWithCovarianceStamped>(
+            "/fix_velocity", 10,
+            std::bind(&MainWindow::gnssFixVel_Callback, this, std::placeholders::_1));
+    last_valid_heading_rad = 0.0;
+
     ui->progressBar_BatPercent->setValue(0);
     ui->lineEdit_BatVolt->setText("0.0");
     ui->lineEdit_BatCurr->setText("0.0");
@@ -46,6 +56,7 @@ MainWindow::~MainWindow()
 {
     saveUsrConfig();
     Utils::terminate_process(robot_driver_process);
+    Utils::terminate_process(&gnss_driver_process);
 
     delete ui;
 }
@@ -79,6 +90,7 @@ void MainWindow::initConfig()
     gnss_ntrip["NtripPort"] = settings_ntrip.value("NtripPort", "2101").toString();
     gnss_ntrip["NtripMountPoint"] = settings_ntrip.value("NtripMountPoint", "").toString();
     gnss_ntrip["NtripPassword"] = settings_ntrip.value("NtripPassword", "").toString();
+    gnss_ntrip["ConvThreshold"] = settings_ntrip.value("ConvThreshold", "").toString();
     Global_DataSet::instance().setGnssNtrip(gnss_ntrip);
 
     QSettings settings_navi("mikuni", "GuideRobot/Navi");
@@ -130,6 +142,54 @@ void MainWindow::on_action_Device_Setup_triggered()
 void MainWindow::showMessageInStatusBar(const QString &message)
 {
     ui->statusBar_main->showMessage(message,20000);
+}
+
+void MainWindow::onNewFixReceived(int status, double conv,double lat, double lon, double alt)
+{
+    QString text = QString("GPS status: %1\nconv: %2\nLat: %3\nLon: %4\nAlt: %5")
+                   .arg(status,0)
+                   .arg(conv,0, 'f',6)
+                   .arg(lat, 0, 'f', 6)
+                   .arg(lon, 0, 'f', 6)
+                   .arg(alt, 0, 'f', 2);
+    ui->textEdit_gnssWorldLocation->setPlainText(text);
+}
+
+void MainWindow::gnssFixVel_Callback(const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg)
+{
+    double vx = msg->twist.twist.linear.x;
+    double vy = msg->twist.twist.linear.y;
+    bool isValid = false;
+    double heading_rad;
+    double heading_deg;
+
+    if(std::hypot(vx, vy) > 0.05)
+    {
+        heading_rad = std::atan2(vy, vx);
+        heading_deg = qRadiansToDegrees(heading_rad);
+
+        QString text = QString("Yaw: %1°")
+                               .arg(heading_deg, 0, 'f', 2);
+        last_valid_heading_rad = heading_rad;
+        ui->lineEdit_gnssYaw->setText(text);
+        isValid = true;
+    }
+    else
+    {
+        heading_rad = last_valid_heading_rad;
+        heading_deg = qRadiansToDegrees(last_valid_heading_rad);
+        QString text = QString("Vel invalid.Last Yaw: %1°")
+                            .arg(heading_deg, 0, 'f', 2);
+        ui->lineEdit_gnssYaw->setText(text);
+    }
+
+    emit newEnuYawUpdated(isValid, heading_rad);
+
+}
+
+void MainWindow::gnssFix_Callback(const sensor_msgs::msg::NavSatFix::SharedPtr msg)
+{
+    emit newFixReceived(msg->status.status, msg->position_covariance[0], msg->latitude, msg->longitude, msg->altitude);
 }
 
 void MainWindow::cartStatus_CallBack(const om_cart::msg::Status& status)
@@ -242,6 +302,8 @@ void MainWindow::on_action_Make_Map_triggered()
     // 连接自定义信号到主窗口的槽（例如 onDialogClosed）
     connect(subwin_makeMap, &SubWindow_MakeMap::subWindowClosed, this, &MainWindow::onMakeMapClosed);
     connect(this, &MainWindow::mapMapNameChanged, subwin_makeMap, &SubWindow_MakeMap::updateMapName);
+    connect(this, &MainWindow::newFixReceived, subwin_makeMap, &SubWindow_MakeMap::onNewFixReceived);
+
     emit mapMapNameChanged(ui->comboBox_MapFolder->currentText());
 
     submdiwin_makeMap->setWindowTitle("Mapping");
@@ -351,12 +413,34 @@ void MainWindow::on_checkBox_GnssSensor_stateChanged(int arg1)
         gnss_rtk_process.setProcessChannelMode(QProcess::MergedChannels);
 
         gnss_rtk_process.start();
+
+        QString strCmd = "gnss_driver.launch.py";
+        Utils::start_process(&gnss_driver_process, "amr_ros", strCmd);
+
     }
     else
     {
         if(gnss_rtk_process.state() != QProcess::NotRunning)
             gnss_rtk_process.terminate();
+
+        Utils::terminate_process(&gnss_driver_process);
     }
+
+}
+
+
+void MainWindow::on_actionGeo_Service_triggered()
+{
+    SubWindow_GeoServiceTool *subwin_geoServiceTool = new SubWindow_GeoServiceTool(node_);
+    QMdiSubWindow *mdiwin_geoServiceTool = ui->mdiArea->addSubWindow(subwin_geoServiceTool);
+    mdiwin_geoServiceTool->setMaximumSize(700,650);
+    mdiwin_geoServiceTool->setMinimumSize(700,650);
+    mdiwin_geoServiceTool->setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+
+    connect(this, &MainWindow::newEnuYawUpdated, subwin_geoServiceTool, &SubWindow_GeoServiceTool::onNewEnuYawUpdated);
+    connect(this, &MainWindow::newFixReceived, subwin_geoServiceTool, &SubWindow_GeoServiceTool::onNewFixReceived);
+
+    mdiwin_geoServiceTool->show();
 
 }
 

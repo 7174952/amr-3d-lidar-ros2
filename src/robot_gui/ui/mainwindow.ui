@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1241</width>
-    <height>806</height>
+    <height>885</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -26,7 +26,7 @@
       <x>-10</x>
       <y>0</y>
       <width>1251</width>
-      <height>731</height>
+      <height>791</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -103,6 +103,7 @@
      <string>&amp;Tools</string>
     </property>
     <addaction name="action_Debug_Enable"/>
+    <addaction name="actionGeo_Service"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
@@ -147,6 +148,7 @@
    <addaction name="separator"/>
    <addaction name="actionSet_Motor_Brake"/>
    <addaction name="separator"/>
+   <addaction name="actionGeo_Service"/>
    <addaction name="actionInit_Pose"/>
   </widget>
   <widget class="QStatusBar" name="statusBar_main">
@@ -163,7 +165,7 @@
     <enum>Qt::LeftToRight</enum>
    </property>
    <property name="autoFillBackground">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
   </widget>
   <widget class="QDockWidget" name="dockWidget_UsrConfig">
@@ -192,7 +194,7 @@
        <x>10</x>
        <y>10</y>
        <width>231</width>
-       <height>241</height>
+       <height>201</height>
       </rect>
      </property>
      <layout class="QFormLayout" name="formLayout">
@@ -291,7 +293,7 @@
        <x>9</x>
        <y>9</y>
        <width>231</width>
-       <height>411</height>
+       <height>451</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
@@ -359,6 +361,13 @@
       </item>
       <item>
        <layout class="QFormLayout" name="formLayout_3">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_SpeedUnit">
+          <property name="text">
+           <string>Unit</string>
+          </property>
+         </widget>
+        </item>
         <item row="0" column="1">
          <widget class="QComboBox" name="comboBox_SpeedUnit">
           <item>
@@ -371,13 +380,6 @@
             <string>km/h</string>
            </property>
           </item>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_SpeedUnit">
-          <property name="text">
-           <string>Speed Unit</string>
-          </property>
          </widget>
         </item>
         <item row="1" column="0">
@@ -396,6 +398,70 @@
            <bool>true</bool>
           </property>
          </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_gnssWorldLocation">
+          <property name="text">
+           <string>World</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QTextEdit" name="textEdit_gnssWorldLocation">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="label_gnssLocalLocation">
+          <property name="text">
+           <string>Local</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <widget class="QTextEdit" name="textEdit_gnssLocalLocation">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="2" column="0">
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="label_gnssYaw">
+          <property name="text">
+           <string>Gnss Yaw</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QLineEdit" name="lineEdit_gnssYaw"/>
         </item>
        </layout>
       </item>
@@ -492,6 +558,11 @@
    </property>
    <property name="text">
     <string>Debug Mode</string>
+   </property>
+  </action>
+  <action name="actionGeo_Service">
+   <property name="text">
+    <string>Geo Service</string>
    </property>
   </action>
  </widget>

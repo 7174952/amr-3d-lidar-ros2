@@ -156,3 +156,185 @@ nav_msgs::msg::Path Utils::loadWaypoints(const QString& file_path, double final_
 
     return waypoints_list;
 }
+
+GeoServiceTool::GeoServiceTool(rclcpp::Node::SharedPtr node, QTextEdit* textEdit_geoShowMsg)
+    : node_(node), textEdit_geoShowMsg_(textEdit_geoShowMsg)
+{
+    datum_client_ = node_->create_client<robot_localization::srv::SetDatum>("/datum");
+    fromll_client_ = node_->create_client<robot_localization::srv::FromLL>("/fromLL");
+    toll_client_ = node_->create_client<robot_localization::srv::ToLL>("/toLL");
+
+    marker_pub_ = node_->create_publisher<visualization_msgs::msg::Marker>("/geo_marker", 10);
+    clicked_sub_ = node_->create_subscription<geometry_msgs::msg::PointStamped>(
+        "/clicked_point", 10,
+        std::bind(&GeoServiceTool::handleClickedPoint, this, std::placeholders::_1));
+
+    auto odom_qos = rclcpp::SensorDataQoS();
+    odom_sub_ = node_->create_subscription<nav_msgs::msg::Odometry>(
+                "/lio_sam/mapping/odometry", odom_qos,
+                std::bind(&GeoServiceTool::odomCallback, this, std::placeholders::_1));
+}
+
+void GeoServiceTool::setDatum(double lat, double lon, double alt)
+{
+    auto req = std::make_shared<robot_localization::srv::SetDatum::Request>();
+    req->geo_pose.position.latitude = lat;
+    req->geo_pose.position.longitude = lon;
+    req->geo_pose.position.altitude = alt;
+
+    datum_client_->async_send_request(req, [this,lat,lon,alt] (rclcpp::Client<robot_localization::srv::SetDatum>::SharedFuture result)
+    {
+        (void)result;
+        RCLCPP_INFO(node_->get_logger(), "✅ Datum set");
+        if(textEdit_geoShowMsg_ != nullptr)
+        {
+            // 安全地发到 UI 线程更新 QTextEdit
+            QString text = QString("Set Datum Completed!\nlat:%1\nlon:%2\nalt:%3")
+                    .arg(lat, 0, 'f',6)
+                    .arg(lon, 0, 'f',6)
+                    .arg(alt, 0, 'f',2);
+            QMetaObject::invokeMethod(
+              textEdit_geoShowMsg_, "setPlainText",
+              Qt::QueuedConnection,
+              Q_ARG(QString, text)
+            );
+        }
+    }
+    );
+}
+
+void GeoServiceTool::fromLL(double lat, double lon, double alt)
+{
+    auto req = std::make_shared<robot_localization::srv::FromLL::Request>();
+    req->ll_point.latitude = lat;
+    req->ll_point.longitude = lon;
+    req->ll_point.altitude = alt;
+
+    fromll_client_->async_send_request(req, [this, lat, lon,alt]( rclcpp::Client<robot_localization::srv::FromLL>::SharedFuture future)
+    {
+        // 获取转换结果
+        auto pt = future.get()->map_point;
+        RCLCPP_INFO(node_->get_logger(), "📍 FromLL map: x=%.2f y=%.2f", pt.x, pt.y);
+        publishMarker(pt);
+
+        if(textEdit_geoShowMsg_ != nullptr)
+        {
+            QString text = QString("LL->map \nlatitude: %1\nlongitude: %2\naltitude: %3\nx: %4\ny: %5\nz: %6\n")
+                     .arg(lat,  0, 'f', 3)
+                     .arg(lon,  0, 'f', 3)
+                     .arg(alt,  0, 'f', 2)
+                     .arg(pt.x,  0, 'f', 3)
+                     .arg(pt.y,  0, 'f', 3)
+                     .arg(pt.z,  0, 'f', 2);
+            // 安全地发到 UI 线程更新 QTextEdit
+            QMetaObject::invokeMethod(
+                textEdit_geoShowMsg_, "setPlainText",
+                Qt::QueuedConnection,
+                Q_ARG(QString, text)
+            );
+        }
+
+    }
+    );
+}
+
+void GeoServiceTool::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
+{
+    currOdom.setX(msg->pose.pose.position.x);
+    currOdom.setY(msg->pose.pose.position.y);
+    currOdom.setZ(msg->pose.pose.position.z);
+}
+
+QVector3D GeoServiceTool::getCurrMapToLL()
+{
+    auto req = std::make_shared<robot_localization::srv::ToLL::Request>();
+    req->map_point.x = currOdom.x();
+    req->map_point.y = currOdom.y();
+    req->map_point.z = currOdom.z();
+
+    // 同步等待 future 返回
+    auto future = toll_client_->async_send_request(req);
+
+    // 阻塞直到结果返回（最多等待5秒）
+    if (rclcpp::spin_until_future_complete(node_, future, std::chrono::seconds(5)) ==
+        rclcpp::FutureReturnCode::SUCCESS)
+    {
+        auto geo = future.get()->ll_point;
+        RCLCPP_INFO(node_->get_logger(),"🧭 ToLL: lat=%.6f lon=%.6f alt=%.2f", geo.latitude, geo.longitude, geo.altitude);
+
+        if(textEdit_geoShowMsg_ != nullptr)
+        {
+            QString text = QString("map->LL \nx: %1\ny: %2\nz: %3\nlat: %4\nlon: %5\nalt: %6")
+                     .arg(currOdom.x(),  0, 'f', 6)
+                     .arg(currOdom.y(),  0, 'f', 6)
+                     .arg(currOdom.z(),  0, 'f', 2)
+                     .arg(geo.latitude,  0, 'f', 6)
+                     .arg(geo.longitude, 0, 'f', 6)
+                     .arg(geo.altitude,  0, 'f', 2);
+            QMetaObject::invokeMethod(
+                textEdit_geoShowMsg_, "setPlainText",
+                Qt::QueuedConnection,
+                Q_ARG(QString, text)
+            );
+        }
+
+        currLL.setX(geo.latitude);
+        currLL.setY(geo.longitude);
+        currLL.setZ(geo.altitude);
+    }
+    else
+    {
+        RCLCPP_WARN(node_->get_logger(), "🛑 ToLL service call timed out or failed.");
+    }
+
+    return currLL;
+}
+
+void GeoServiceTool::handleClickedPoint(const geometry_msgs::msg::PointStamped::SharedPtr msg)
+{
+    auto req = std::make_shared<robot_localization::srv::ToLL::Request>();
+    req->map_point = msg->point;
+
+    toll_client_->async_send_request(req, [this, msg](rclcpp::Client<robot_localization::srv::ToLL>::SharedFuture future)
+    {
+        auto geo = future.get()->ll_point;
+        RCLCPP_INFO(node_->get_logger(),"🧭 ToLL: lat=%.6f lon=%.6f alt=%.2f", geo.latitude, geo.longitude, geo.altitude);
+        if(textEdit_geoShowMsg_ != nullptr)
+        {
+            QString text = QString("map->LL \nx: %1\ny: %2\nz: %3\nlat: %4\nlon: %5\nalt: %6")
+                     .arg(msg->point.x,  0, 'f', 6)
+                     .arg(msg->point.y,  0, 'f', 6)
+                     .arg(msg->point.z,  0, 'f', 2)
+                     .arg(geo.latitude,  0, 'f', 6)
+                     .arg(geo.longitude, 0, 'f', 6)
+                     .arg(geo.altitude,  0, 'f', 2);
+            // 安全地发到 UI 线程更新 QTextEdit
+            QMetaObject::invokeMethod(
+                textEdit_geoShowMsg_, "setPlainText",
+                Qt::QueuedConnection,
+                Q_ARG(QString, text)
+            );
+        }
+    }
+    );
+
+}
+
+void GeoServiceTool::publishMarker(const geometry_msgs::msg::Point &point)
+{
+    visualization_msgs::msg::Marker marker;
+    marker.header.frame_id = "map";
+    marker.header.stamp = node_->now();
+    marker.ns = "geo_marker";
+    marker.id = 0;
+    marker.type = marker.SPHERE;
+    marker.action = marker.ADD;
+    marker.pose.position = point;
+    marker.pose.orientation.w = 1.0;
+    marker.scale.x = marker.scale.y = marker.scale.z = 0.5;
+    marker.color.a = 1.0;
+    marker.color.r = 0.1;
+    marker.color.g = 0.8;
+    marker.color.b = 0.1;
+    marker_pub_->publish(marker);
+}

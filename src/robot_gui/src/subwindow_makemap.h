@@ -6,6 +6,7 @@
 #include <QDialog>
 #include <QMessageBox>
 #include <QDir>
+#include <QtMath>
 
 //ROS2 Files
 #include <rclcpp/rclcpp.hpp>
@@ -39,6 +40,7 @@ signals:
 
 public slots:
     void updateMapName(const QString& newMapName);
+    void onNewFixReceived(int status, double conv, double lat, double lon, double alt);
 
 private slots:
     void on_pushButton_StartMap_toggled(bool checked);
@@ -54,6 +56,14 @@ private:
 private:
     Ui::SubWindow_MakeMap *ui;
     QString m_mapName;
+    bool is_init_datum;
+    GeoServiceTool *geoTool;
+    double origin_lat;
+    double origin_lon;
+    double origin_alt;
+    double yaw_offset;
+    double gpsConvThreshold;
+
 };
 
 #endif // SUBWINDOW_MAKEMAP_H
