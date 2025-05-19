@@ -1,31 +1,40 @@
-# Configuration Settings for C94-M8P device
 ublox_gps_node:
   ros__parameters:
-    debug: 0                    # Range 0-4 (0 means no debug statements will print)
+    # 常规参数
+    debug: 1
     device: /dev/ttyACM-gnss
     frame_id: gps
-    rate: 1.0                   # in Hz
-    config_on_startup: false
-    nav_rate: 1                 # [# of measurement cycles], recommended 1 Hz, may
-                                # be either 5 Hz (Dual constellation) or
-                                # 8 Hz (GPS only)
+    rate: 1.0
+    config_on_startup: true        # 启用自动配置
+    nav_rate: 1
+
+    # 串口参数（用于接收差分和输出UBX）
     uart1:
       baudrate: 38400
-    # TMODE3 Config
-    tmode3: 1                   # Survey-In Mode
-    sv_in:
-      reset: True               # True: disables and re-enables survey-in (resets)
-                                # False: Disables survey-in only if TMODE3 is
-                                # disabled
-      min_dur: 300              # Survey-In Minimum Duration [s]
-      acc_lim: 3.0              # Survey-In Accuracy Limit [m]
+      in: 4       # RTCM3 input
+      out: 1      # UBX output
 
+    # 设置为移动站模式
+    tmode3: 0      # Disable TMODE3 → Rover 模式（重要）
+
+    # 推荐运动模型（用于地面机器人/车）
+    dynamic_model: portable
+
+    # 辅助输出开关（仅保留常用）
     inf:
-      all: true                   # Whether to display all INF messages in console
-    
+      all: false
+
     publish:
       all: true
       aid:
         hui: false
       nav:
         posecef: false
+        relocef: true
+        relposned: true
+      rxm:
+        rtcm: true
+
+    fix_mode: auto
+    dr_limit: 0
+    enable_pps: false

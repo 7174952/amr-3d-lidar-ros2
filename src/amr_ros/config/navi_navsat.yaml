@@ -2,15 +2,10 @@ navsat_transform_node:
   ros__parameters:
     frequency: 30.0
     use_odometry_yaw: true
-    odometry_topic: /odometry/filtered
     #yaw_offset: 0.314159
     imu_topic: ""
-    gps_topic: /fix
     zero_altitude: false
     broadcast_cartesian_transform: false
     publish_filtered_gps: true
     wait_for_datum: false
     transform_timeout: 0.0
-    map_frame: map
-    base_link_frame: base_link
-    world_frame: odom

@@ -5,12 +5,21 @@ from launch_ros.actions import Node
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from ament_index_python.packages import get_package_share_directory
 from launch.actions import TimerAction, IncludeLaunchDescription
+import os
+from launch.conditions import IfCondition
 
 
 def generate_launch_description():
     # Declare launch arguments
     launch_args = [
-        DeclareLaunchArgument('globalmap_path', default_value='/home/mikuni/ros2_ws/src/amr_ros/maps/my_test1/GlobalMap.pcd'),
+        DeclareLaunchArgument('enable_gnss',default_value='true'),
+        DeclareLaunchArgument('latitude', default_value='35.0'),
+        DeclareLaunchArgument('longitude', default_value='135.0'),
+        DeclareLaunchArgument('altitude', default_value='0.0'),
+        DeclareLaunchArgument("yaw_offset", default_value="0.0"),
+        DeclareLaunchArgument('gps_cov_threshold', default_value='0.5'),
+
+        DeclareLaunchArgument('globalmap_path', default_value='/home/mikuni/ros2_ws/src/amr_ros/maps/demoRD/GlobalMap.pcd'),
         DeclareLaunchArgument('obstacle_lim', default_value='10'),
         DeclareLaunchArgument('init_px', default_value='0.0'),
         DeclareLaunchArgument('init_py', default_value='0.0'),
@@ -31,6 +40,14 @@ def generate_launch_description():
             [get_package_share_directory('amr_ros'), 'rviz', 'guide_robot.rviz']
         )),
     ]
+
+    # 获取参数文件的路径
+    navi_param_file_path = os.path.join(
+        get_package_share_directory('amr_ros'),
+        'config',
+        'navi_navsat.yaml'
+    )
+    enable_gnss = LaunchConfiguration('enable_gnss')
 
     # Include hdl_localization_livox.launch.py
     hdl_localization_launch = IncludeLaunchDescription(
@@ -75,6 +92,39 @@ def generate_launch_description():
         }]
     )
 
+    # transform to local
+    navsat_trans_node = Node(
+        package='robot_localization',
+        executable='navsat_transform_node',
+        name='navsat_transform_node',
+        condition=IfCondition(enable_gnss),
+        parameters=[navi_param_file_path,
+                    {
+                    'datum.latitude': LaunchConfiguration('latitude'),
+                    'datum.longitude': LaunchConfiguration('longitude'),
+                    'datum.altitude': LaunchConfiguration('altitude'),
+                    'yaw_offset': LaunchConfiguration('yaw_offset'),
+            }
+        ],
+        remappings=[
+            ('/gps/fix', '/fix'),
+            ('/odometry/filtered','/hdl_localization/odom')
+        ]
+
+    )
+
+    odom_select_node = Node(
+        package='amr_ros',
+        executable='odom_selector_node',
+        name='odom_selector_node',
+        parameters=[
+                    {
+                    'gps_cov_threshold': LaunchConfiguration('gps_cov_threshold'),
+                    'enable_gnss': LaunchConfiguration('enable_gnss')
+                }
+        ]
+    )
+
     # Static transform publisher
     static_tf = Node(
         package='tf2_ros',
@@ -85,7 +135,7 @@ def generate_launch_description():
 
     # 3D LiDAR visualization launch (Assuming converted to .launch.py)
     lidar_livox_launch = TimerAction(
-        period=5.0,
+        period=10.0,
         actions=[
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(PathJoinSubstitution(
@@ -109,8 +159,10 @@ def generate_launch_description():
             hdl_localization_launch,
             pure_pursuit_launch,
             detect_obstacle_node,
+            navsat_trans_node,
+            odom_select_node,
             static_tf,
             rviz_node,
-            lidar_livox_launch
+            # lidar_livox_launch
         ]
     )

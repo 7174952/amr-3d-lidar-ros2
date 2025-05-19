@@ -10,12 +10,6 @@ from launch_ros.parameter_descriptions import ParameterValue
 from launch.conditions import IfCondition
 
 def generate_launch_description():
-    # 获取参数文件的路径
-    gnss_param_file_path = os.path.join(
-        get_package_share_directory('amr_ros'),
-        'config',
-        'zed_f9p.yaml'
-    )
     robot_localization_param_file_path = os.path.join(
         get_package_share_directory('amr_ros'),
         'config',
