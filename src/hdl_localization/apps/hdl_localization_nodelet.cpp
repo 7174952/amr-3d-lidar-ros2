@@ -421,6 +421,7 @@ private:
 
   // 发布里程计（以及 TF）
   void publish_odometry(const std_msgs::msg::Header & stamp_header, const Eigen::Matrix4f & pose) {
+#if 0 //debug_ryu
     try {
       if(tf_buffer_.canTransform(robot_odom_frame_id_, odom_child_frame_id_, rclcpp::Time(0))) {
         geometry_msgs::msg::TransformStamped map_wrt_frame = tf2::eigenToTransform(Eigen::Isometry3d(pose.inverse().cast<double>()));
@@ -454,6 +455,7 @@ private:
     } catch (tf2::TransformException &ex) {
       RCLCPP_ERROR(this->get_logger(), "Transform error in publish_odometry: %s", ex.what());
     }
+#endif
     nav_msgs::msg::Odometry odom;
     odom.header.stamp = stamp_header.stamp;
     odom.header.frame_id = "map";
