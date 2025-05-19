@@ -32,12 +32,20 @@ MainWindow::MainWindow(QWidget *parent) :
     gnss_fix_sub = node_->create_subscription<sensor_msgs::msg::NavSatFix>(
             "/fix", 10,
             std::bind(&MainWindow::gnssFix_Callback, this, std::placeholders::_1));
+    gps_filtered_sub = node_->create_subscription<sensor_msgs::msg::NavSatFix>(
+            "/gps/filtered", 10,
+            std::bind(&MainWindow::gpsFiltered_Callback, this, std::placeholders::_1));
+    isNavsatStartupCompleted = false;
+
     connect(this, &MainWindow::newFixReceived, this, &MainWindow::onNewFixReceived);
 
-    gnss_vel_sub = node_->create_subscription<geometry_msgs::msg::TwistWithCovarianceStamped>(
-            "/fix_velocity", 10,
-            std::bind(&MainWindow::gnssFixVel_Callback, this, std::placeholders::_1));
-    last_valid_heading_rad = 0.0;
+    odom_gps_sub = node_->create_subscription<nav_msgs::msg::Odometry>(
+        "/odometry/gps", 10,
+        std::bind(&MainWindow::odomGpsCallback, this, std::placeholders::_1));
+    gps_path_pub = node_->create_publisher<nav_msgs::msg::Path>("/gps_path", 10);
+    gps_marker_pub = node_->create_publisher<visualization_msgs::msg::MarkerArray>("/gps_marker", 10);
+    gps_path.header.frame_id = "map";
+
 
     ui->progressBar_BatPercent->setValue(0);
     ui->lineEdit_BatVolt->setText("0.0");
@@ -50,6 +58,13 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&gnss_rtk_process, &QProcess::errorOccurred,
             this,  &MainWindow::handleError);
 
+    //Set background noise threshold
+    QString filePath = Global_DataSet::instance().sysPath()["ScriptPath"] + "/chatbot/noise_threshold.py";
+    QString pythonPath = Global_DataSet::instance().sysPath()["PyPathVoice"] + "/bin/python";
+    QString workDirectory = Global_DataSet::instance().sysPath()["ScriptPath"] + "/chatbot";
+    chat_threshold_process = new QProcess(this);
+    Utils::start_python_script(chat_threshold_process, pythonPath, workDirectory, filePath);
+
 }
 
 MainWindow::~MainWindow()
@@ -57,6 +72,7 @@ MainWindow::~MainWindow()
     saveUsrConfig();
     Utils::terminate_process(robot_driver_process);
     Utils::terminate_process(&gnss_driver_process);
+    Utils::terminate_python_script(chat_threshold_process);
 
     delete ui;
 }
@@ -117,6 +133,7 @@ void MainWindow::initConfig()
     robot_size["RobotWidth"] = settings_size.value("RobotWidth", "").toString();
     robot_size["RobotHeight"] = settings_size.value("RobotHeight", "").toString();
     robot_size["RobotWidthTole"] = settings_size.value("RobotWidthTole", "0.05").toString();
+    robot_size["DistanceLidarToGnss"] = settings_size.value("DistanceLidarToGnss", "0.8").toString();
     Global_DataSet::instance().setRobotSize(robot_size);
 
 }
@@ -144,6 +161,37 @@ void MainWindow::showMessageInStatusBar(const QString &message)
     ui->statusBar_main->showMessage(message,20000);
 }
 
+void MainWindow::odomGpsCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
+{
+    //show gps path
+    geometry_msgs::msg::PoseStamped ps;
+    ps.header = msg->header;
+    ps.pose = msg->pose.pose;
+
+    gps_path.poses.push_back(ps);
+    gps_path.header.stamp = node_->now();
+    gps_path_pub->publish(gps_path);
+
+    visualization_msgs::msg::Marker marker;
+    marker.header = msg->header;
+    marker.ns = "gps";
+    marker.id = static_cast<int>(gps_path.poses.size());  // Unique ID
+    marker.type = visualization_msgs::msg::Marker::SPHERE;
+    marker.action = visualization_msgs::msg::Marker::ADD;
+    marker.pose = ps.pose;
+    marker.scale.x = 0.2;
+    marker.scale.y = 0.2;
+    marker.scale.z = 0.2;
+    marker.color.a = 1.0;
+    marker.color.r = 0.0;
+    marker.color.g = 1.0;
+    marker.color.b = 0.0;
+
+    visualization_msgs::msg::MarkerArray marker_array;
+    marker_array.markers.push_back(marker);
+    gps_marker_pub->publish(marker_array);
+}
+
 void MainWindow::onNewFixReceived(int status, double conv,double lat, double lon, double alt)
 {
     QString text = QString("GPS status: %1\nconv: %2\nLat: %3\nLon: %4\nAlt: %5")
@@ -153,38 +201,18 @@ void MainWindow::onNewFixReceived(int status, double conv,double lat, double lon
                    .arg(lon, 0, 'f', 6)
                    .arg(alt, 0, 'f', 2);
     ui->textEdit_gnssWorldLocation->setPlainText(text);
+
 }
 
-void MainWindow::gnssFixVel_Callback(const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg)
+void MainWindow::gpsFiltered_Callback(const sensor_msgs::msg::NavSatFix::SharedPtr msg)
 {
-    double vx = msg->twist.twist.linear.x;
-    double vy = msg->twist.twist.linear.y;
-    bool isValid = false;
-    double heading_rad;
-    double heading_deg;
-
-    if(std::hypot(vx, vy) > 0.05)
+    //To make sure gps package startup Completed
+    if(!isNavsatStartupCompleted)
     {
-        heading_rad = std::atan2(vy, vx);
-        heading_deg = qRadiansToDegrees(heading_rad);
-
-        QString text = QString("Yaw: %1°")
-                               .arg(heading_deg, 0, 'f', 2);
-        last_valid_heading_rad = heading_rad;
-        ui->lineEdit_gnssYaw->setText(text);
-        isValid = true;
+        ui->textEdit_gnssLocalLocation->setPlainText("/gps/filtered topic received!");
+        emit navsatStartupCompleted();
+        isNavsatStartupCompleted = true;
     }
-    else
-    {
-        heading_rad = last_valid_heading_rad;
-        heading_deg = qRadiansToDegrees(last_valid_heading_rad);
-        QString text = QString("Vel invalid.Last Yaw: %1°")
-                            .arg(heading_deg, 0, 'f', 2);
-        ui->lineEdit_gnssYaw->setText(text);
-    }
-
-    emit newEnuYawUpdated(isValid, heading_rad);
-
 }
 
 void MainWindow::gnssFix_Callback(const sensor_msgs::msg::NavSatFix::SharedPtr msg)
@@ -255,18 +283,21 @@ void MainWindow::onManualControlClosed()
 void MainWindow::onMakeMapClosed()
 {
     ui->action_Make_Map->setEnabled(true);
+    gps_path.poses.clear();
 }
 
 void MainWindow::onMakeRouteClosed()
 {
     ui->action_Make_Route->setEnabled(true);
     ui->comboBox_MapFolder->setEnabled(true);
+    gps_path.poses.clear();
 }
 
 void MainWindow::onGuideRobotClosed()
 {
     ui->action_Guide_Robot->setEnabled(true);
     ui->comboBox_MapFolder->setEnabled(true);
+    gps_path.poses.clear();
 }
 
 void MainWindow::on_action_Cart_status_toggled(bool arg1)
@@ -302,13 +333,15 @@ void MainWindow::on_action_Make_Map_triggered()
     // 连接自定义信号到主窗口的槽（例如 onDialogClosed）
     connect(subwin_makeMap, &SubWindow_MakeMap::subWindowClosed, this, &MainWindow::onMakeMapClosed);
     connect(this, &MainWindow::mapMapNameChanged, subwin_makeMap, &SubWindow_MakeMap::updateMapName);
-    connect(this, &MainWindow::newFixReceived, subwin_makeMap, &SubWindow_MakeMap::onNewFixReceived);
+    connect(this, &MainWindow::navsatStartupCompleted, subwin_makeMap, &SubWindow_MakeMap::onNavsatStartupCompleted);
 
     emit mapMapNameChanged(ui->comboBox_MapFolder->currentText());
 
     submdiwin_makeMap->setWindowTitle("Mapping");
     submdiwin_makeMap->show();
     ui->action_Make_Map->setEnabled(false);
+    isNavsatStartupCompleted = false;
+    ui->textEdit_gnssLocalLocation->clear();
 }
 
 void MainWindow::on_action_Make_Route_triggered()
@@ -321,12 +354,16 @@ void MainWindow::on_action_Make_Route_triggered()
     // 连接自定义信号到主窗口的槽（例如 onDialogClosed）
     connect(subwin_makeRoute, &SubWindow_MakeRoute::subWindowClosed, this, &MainWindow::onMakeRouteClosed);
     connect(this, &MainWindow::mapMapNameChanged, subwin_makeRoute, &SubWindow_MakeRoute::updateMapName);
+    connect(this, &MainWindow::navsatStartupCompleted, subwin_makeRoute, &SubWindow_MakeRoute::onNavsatStartupCompleted);
+
     emit mapMapNameChanged(ui->comboBox_MapFolder->currentText());
 
     submdiwin_makeRoute->setWindowTitle("Make Route");
     submdiwin_makeRoute->show();
     ui->action_Make_Route->setEnabled(false);
     ui->comboBox_MapFolder->setEnabled(false);
+    isNavsatStartupCompleted = false;
+    ui->textEdit_gnssLocalLocation->clear();
 }
 
 void MainWindow::on_comboBox_MapFolder_currentTextChanged(const QString &arg1)
@@ -352,6 +389,7 @@ void MainWindow::on_action_Guide_Robot_triggered()
     connect(this, &MainWindow::mapMapNameChanged, subwin_guideRobot, &SubWindow_GuideRobot::updateMapName);
     connect(subwin_guideRobot, &SubWindow_GuideRobot::sendMessage, this, &MainWindow::showMessageInStatusBar);
     connect(ui->checkBox_GuideCamera, &QCheckBox::stateChanged, subwin_guideRobot, &SubWindow_GuideRobot::onGuideCameraStateChanged);
+    connect(this, &MainWindow::navsatStartupCompleted, subwin_guideRobot, &SubWindow_GuideRobot::onNavsatStartupCompleted);
 
     emit mapMapNameChanged(ui->comboBox_MapFolder->currentText());
 
@@ -359,6 +397,7 @@ void MainWindow::on_action_Guide_Robot_triggered()
     submdiwin_guideRobot->show();
     ui->action_Guide_Robot->setEnabled(false);
     ui->comboBox_MapFolder->setEnabled(false);
+    isNavsatStartupCompleted = false;
 
 }
 
@@ -414,7 +453,9 @@ void MainWindow::on_checkBox_GnssSensor_stateChanged(int arg1)
 
         gnss_rtk_process.start();
 
-        QString strCmd = "gnss_driver.launch.py";
+        QSettings settings_size("mikuni", "GuideRobot/Size");
+        QString strCmd = QString("gnss_driver.launch.py")
+                        + " gps_altitude_offset:=" + QString::number(settings_size.value("DistanceLidarToGnss", "0.8").toDouble(),'f',2);
         Utils::start_process(&gnss_driver_process, "amr_ros", strCmd);
 
     }
@@ -437,10 +478,50 @@ void MainWindow::on_actionGeo_Service_triggered()
     mdiwin_geoServiceTool->setMinimumSize(700,650);
     mdiwin_geoServiceTool->setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
 
-    connect(this, &MainWindow::newEnuYawUpdated, subwin_geoServiceTool, &SubWindow_GeoServiceTool::onNewEnuYawUpdated);
     connect(this, &MainWindow::newFixReceived, subwin_geoServiceTool, &SubWindow_GeoServiceTool::onNewFixReceived);
 
     mdiwin_geoServiceTool->show();
 
+}
+
+
+void MainWindow::on_actionNoise_Threshold_triggered()
+{
+    //Set background noise threshold
+    QString filePath = Global_DataSet::instance().sysPath()["ScriptPath"] + "/chatbot/noise_threshold.py";
+    QString pythonPath = Global_DataSet::instance().sysPath()["PyPathVoice"] + "/bin/python";
+    QString workDirectory = Global_DataSet::instance().sysPath()["ScriptPath"] + "/chatbot";
+
+    QString fileTxt = Global_DataSet::instance().sysPath()["ScriptPath"] + "/chatbot/threshold.txt";
+    QFile::remove(fileTxt);
+
+    chat_threshold_process = new QProcess(this);
+    Utils::start_python_script(chat_threshold_process, pythonPath, workDirectory, filePath);
+
+    while(!QFile::exists(fileTxt))
+    {
+    }
+
+    QMessageBox::information(this,"info","Set background noise threshold finished.");
+
+}
+
+
+void MainWindow::on_actionUser_Face_Register_triggered()
+{
+    SubWindow_FaceLogin *subwin_faceLogin = new SubWindow_FaceLogin();
+    QMdiSubWindow *mdiwin_faceLogin = ui->mdiArea->addSubWindow(subwin_faceLogin);
+    mdiwin_faceLogin->setMinimumSize(900,650);
+    mdiwin_faceLogin->setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+
+    mdiwin_faceLogin->show();
+
+}
+
+
+void MainWindow::on_checkBox_GuideCamera_stateChanged(int arg1)
+{
+    bool state = (arg1 == 2) ? true : false;
+    Global_DataSet::instance().setSensorEnable("GuideCameraEn",state);
 }
 

@@ -104,6 +104,8 @@
     </property>
     <addaction name="action_Debug_Enable"/>
     <addaction name="actionGeo_Service"/>
+    <addaction name="actionNoise_Threshold"/>
+    <addaction name="actionUser_Face_Register"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
@@ -150,6 +152,8 @@
    <addaction name="separator"/>
    <addaction name="actionGeo_Service"/>
    <addaction name="actionInit_Pose"/>
+   <addaction name="separator"/>
+   <addaction name="actionUser_Face_Register"/>
   </widget>
   <widget class="QStatusBar" name="statusBar_main">
    <property name="cursor">
@@ -563,6 +567,16 @@
   <action name="actionGeo_Service">
    <property name="text">
     <string>Geo Service</string>
+   </property>
+  </action>
+  <action name="actionNoise_Threshold">
+   <property name="text">
+    <string>Set Noise Threshold</string>
+   </property>
+  </action>
+  <action name="actionUser_Face_Register">
+   <property name="text">
+    <string>User Face Login</string>
    </property>
   </action>
  </widget>

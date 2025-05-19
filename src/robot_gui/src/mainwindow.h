@@ -24,6 +24,7 @@
 #include "subwindow_makeroute.h"
 #include "subwindow_guiderobot.h"
 #include "subwindow_geoservicetool.h"
+#include "subwindow_facelogin.h"
 
 #include "utils.h"
 #include "global_dataset.h"
@@ -32,6 +33,8 @@
 #include <nav_msgs/msg/odometry.hpp>
 #include <sensor_msgs/msg/nav_sat_fix.hpp>
 #include <geometry_msgs/msg/twist_with_covariance_stamped.hpp>
+#include <visualization_msgs/msg/marker_array.hpp>
+#include <visualization_msgs/msg/marker.hpp>
 
 #include "om_cart/msg/cmd.hpp"
 #include "om_cart/msg/status.hpp"
@@ -55,7 +58,7 @@ private:
 signals:
     void mapMapNameChanged(const QString& newMapName);
     void newFixReceived(int status, double conv, double lat, double lon, double alt);
-    void newEnuYawUpdated(bool isValid, double yaw_rad);
+    void navsatStartupCompleted();
 
 private slots:
       void showMessageInStatusBar(const QString &message);
@@ -102,10 +105,19 @@ private slots:
 
   void on_actionGeo_Service_triggered();
 
+  void on_actionNoise_Threshold_triggered();
+
+  void on_actionUser_Face_Register_triggered();
+
+  void on_checkBox_GuideCamera_stateChanged(int arg1);
+
 private:
   void cartStatus_CallBack(const om_cart::msg::Status& status);
   void gnssFix_Callback(const sensor_msgs::msg::NavSatFix::SharedPtr msg);
   void gnssFixVel_Callback(const geometry_msgs::msg::TwistWithCovarianceStamped::SharedPtr msg);
+  void gpsFiltered_Callback(const sensor_msgs::msg::NavSatFix::SharedPtr msg);
+  void odomGpsCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
+
 
 private:
    rclcpp::Node::SharedPtr node_;
@@ -114,10 +126,16 @@ private:
 
    rclcpp::Subscription<om_cart::msg::Status>::SharedPtr cart_status_sub;
    rclcpp::Subscription<sensor_msgs::msg::NavSatFix>::SharedPtr gnss_fix_sub;
+   rclcpp::Subscription<sensor_msgs::msg::NavSatFix>::SharedPtr gps_filtered_sub;
+   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_gps_sub;
+   rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr gps_path_pub;
+   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr gps_marker_pub;
+   nav_msgs::msg::Path gps_path;
+
    rclcpp::Subscription<geometry_msgs::msg::TwistWithCovarianceStamped>::SharedPtr gnss_vel_sub;
 
    QTimer* timer_;
-   double last_valid_heading_rad;
+   bool isNavsatStartupCompleted;
 
    enum
    {
@@ -164,6 +182,7 @@ private:
   QProcess* robot_driver_process;
   QProcess gnss_driver_process;
   QProcess gnss_rtk_process;
+  QProcess* chat_threshold_process;
 
 };
 

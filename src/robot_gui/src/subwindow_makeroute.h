@@ -47,6 +47,7 @@ signals:
 
 public slots:
     void updateMapName(const QString& newMapName);
+    void onNavsatStartupCompleted();
 
 private slots:
     void on_pushButton_StartRoute_toggled(bool checked);
@@ -69,6 +70,7 @@ private:
 
     QString m_mapName;
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr sub_odom;
+
     QVector<double> last_point;
     rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_pub;
     int idx_;
@@ -129,6 +131,14 @@ private:
 private:
     Ui::SubWindow_MakeRoute *ui;
     QStandardItemModel *model;
+    GeoServiceTool *geoTool;
+    double origin_lat;
+    double origin_lon;
+    double origin_alt;
+    double yaw_offset;
+    bool is_init_datum;
+    double gpsConvThreshold;
+
 };
 
 #endif // SUBWINDOW_MAKEROUTE_H

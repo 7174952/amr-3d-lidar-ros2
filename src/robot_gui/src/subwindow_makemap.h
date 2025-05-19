@@ -37,10 +37,9 @@ signals:
     void subWindowClosed();
     void sendMessage(const QString &message); //send to mainwindow statusBar
 
-
 public slots:
     void updateMapName(const QString& newMapName);
-    void onNewFixReceived(int status, double conv, double lat, double lon, double alt);
+    void onNavsatStartupCompleted();
 
 private slots:
     void on_pushButton_StartMap_toggled(bool checked);
@@ -51,7 +50,6 @@ private:
     rclcpp::Node::SharedPtr node_;
     QProcess* ros_make_map_process;
     QProcess* ros_manual_process;
-    QProcess* gnss_visual_process;
 
 private:
     Ui::SubWindow_MakeMap *ui;

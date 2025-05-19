@@ -26,7 +26,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab_Cart">
        <attribute name="title">
@@ -72,46 +72,8 @@
          <item row="2" column="1">
           <widget class="QComboBox" name="comboBox"/>
          </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_Size">
-           <property name="text">
-            <string>Robot Size (mm)</string>
-           </property>
-          </widget>
-         </item>
          <item row="3" column="1">
-          <layout class="QGridLayout" name="gridLayout">
-           <item row="1" column="5">
-            <widget class="QLineEdit" name="lineEdit_Height"/>
-           </item>
-           <item row="1" column="3">
-            <widget class="QLineEdit" name="lineEdit_Width"/>
-           </item>
-           <item row="1" column="2">
-            <widget class="QLabel" name="label_Width">
-             <property name="text">
-              <string>Width:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="4">
-            <widget class="QLabel" name="label_Height">
-             <property name="text">
-              <string>Height:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_Length">
-             <property name="text">
-              <string>Length:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QLineEdit" name="lineEdit_Length"/>
-           </item>
-          </layout>
+          <layout class="QGridLayout" name="gridLayout"/>
          </item>
         </layout>
        </widget>
@@ -147,38 +109,14 @@
           </rect>
          </property>
          <layout class="QFormLayout" name="formLayout_2">
-          <item row="0" column="1">
-           <layout class="QHBoxLayout" name="horizontalLayout">
-            <item>
-             <widget class="QCheckBox" name="checkBox_FrontEnable">
-              <property name="text">
-               <string>Camera Enable</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_2">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
-          </item>
-          <item row="1" column="0">
+          <item row="0" column="0">
            <widget class="QLabel" name="label_FrontComPort">
             <property name="text">
              <string>Port</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item row="0" column="1">
            <widget class="QComboBox" name="comboBox_FrontComPort"/>
           </item>
          </layout>
@@ -206,46 +144,15 @@
           </rect>
          </property>
          <layout class="QFormLayout" name="formLayout_3">
-          <item row="1" column="1">
-           <widget class="QComboBox" name="comboBox_BehindComPort"/>
-          </item>
-          <item row="0" column="1">
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
-            <item>
-             <widget class="QCheckBox" name="checkBox_BehindEnable">
-              <property name="text">
-               <string>Camera Enable</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="checkBox_EnableGuide">
-              <property name="text">
-               <string>Guide Enable</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
-          </item>
-          <item row="1" column="0">
+          <item row="0" column="0">
            <widget class="QLabel" name="label_BehindComPort">
             <property name="text">
              <string>Port</string>
             </property>
            </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="comboBox_BehindComPort"/>
           </item>
          </layout>
         </widget>

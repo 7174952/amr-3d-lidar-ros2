@@ -13,6 +13,7 @@
 #include <QTextEdit>
 #include <QMetaObject>
 #include <QVector3D>
+#include <QtMath>
 
 #include "global_dataset.h"
 #include <LinearMath/btMatrix3x3.h>
@@ -65,6 +66,15 @@ private:
 class GeoServiceTool
 {
 public:
+    struct GnssPostion
+    {
+        double lat;
+        double lon;
+        double alt;
+        double yaw_offset;
+    };
+
+public:
     GeoServiceTool(rclcpp::Node::SharedPtr node, QTextEdit* textEdit_geoShowMsg);
 
     void setDatum(double lat, double lon, double alt);
@@ -72,6 +82,8 @@ public:
     void handleClickedPoint(const geometry_msgs::msg::PointStamped::SharedPtr msg);
     void odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
     QVector3D getCurrMapToLL();
+    bool getDatumFromFile(QString filePath, double &datum_lat, double &datum_lon, double &datum_alt, double &yaw_offset);
+    double getGnssMoveOrientalDeg(GnssPostion aheadPointPos, GnssPostion refPointPos);
 
 private:
     rclcpp::Node::SharedPtr node_;

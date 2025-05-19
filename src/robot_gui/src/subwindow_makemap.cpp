@@ -9,18 +9,17 @@ SubWindow_MakeMap::SubWindow_MakeMap(rclcpp::Node::SharedPtr node, QWidget *pare
 
     ros_make_map_process = new QProcess(this);;
     ros_manual_process = new QProcess(this);
-    gnss_visual_process = new QProcess(this);
 
     is_init_datum = false;
     geoTool = new GeoServiceTool(node_, ui->textEdit_mapStatus);
     gpsConvThreshold = Global_DataSet::instance().gnssNtrip()["ConvThreshold"].toDouble();
+
 }
 
 SubWindow_MakeMap::~SubWindow_MakeMap()
 {
     Utils::terminate_process(ros_manual_process);
     Utils::terminate_process(ros_make_map_process);
-    Utils::terminate_python_script(gnss_visual_process);
     delete ui;
 }
 
@@ -29,13 +28,10 @@ void SubWindow_MakeMap::updateMapName(const QString& newMapName)
     m_mapName = newMapName;
 }
 
-void SubWindow_MakeMap::onNewFixReceived(int status, double conv, double lat, double lon, double alt)
-{
-    if(!is_init_datum && conv < gpsConvThreshold && ui->pushButton_StartMap->isChecked())
-    {
-        is_init_datum = true;
-        geoTool->setDatum(origin_lat, origin_lon, origin_alt);
-    }
+void SubWindow_MakeMap::onNavsatStartupCompleted()
+{    
+    geoTool->setDatum(origin_lat, origin_lon, origin_alt);
+
 }
 
 void SubWindow_MakeMap::on_pushButton_StartMap_toggled(bool checked)
@@ -107,30 +103,20 @@ void SubWindow_MakeMap::on_pushButton_StartMap_toggled(bool checked)
             pcdPath.append(tmp.at(i) + "/");
 
         bool gnss_enable = (Global_DataSet::instance().sensorEnable("GnssEn") && ui->checkBox_mapWithGnss->isChecked());
-        if(gnss_enable)
-        {
-            QString filePath = map_path + "/gnss_map_origin.txt";
-            QFile file(filePath);
-            if(file.open(QIODevice::ReadOnly | QIODevice::Text))
-            {
-                QTextStream in(&file);
-                while(!in.atEnd())
-                {
-                    QString str = in.readLine().trimmed();
-                    if(str.contains("lat")) origin_lat = str.split(":").at(1).toDouble();
-                    if(str.contains("lon")) origin_lon = str.split(":").at(1).toDouble();
-                    if(str.contains("alt")) origin_alt = str.split(":").at(1).toDouble();
-                    if(str.contains("yaw_offset")) yaw_offset = qDegreesToRadians(str.split(":").at(1).toDouble());
-                }
-            }
-            file.close();
-        }
-
         QString strCmd = QString("om_map_liosam.launch.py")
                 + " savePCDDirectory:=" + pcdPath
                 + " enable_gnss:=" + (gnss_enable ? "true" : "false");
+
         if(gnss_enable)
         {
+            QString filePath = map_path + "/gnss_map_origin.txt";
+            gpsConvThreshold = Global_DataSet::instance().gnssNtrip()["ConvThreshold"].toDouble();
+
+            if(!geoTool->getDatumFromFile(filePath, origin_lat, origin_lon, origin_alt, yaw_offset))
+            {
+                QMessageBox::warning(this,"Warning","Load Datum file Failed! Make gnss_map_origin.txt file by geo service tool first!");
+                return;
+            }
             strCmd += " latitude:=" + QString::number(origin_lat, 'f', 6)
                     + " longitude:=" + QString::number(origin_lon,'f',6)
                     + " altitude:=" + QString::number(origin_alt,'f',2)
@@ -141,22 +127,12 @@ void SubWindow_MakeMap::on_pushButton_StartMap_toggled(bool checked)
         Utils::start_process(ros_make_map_process, "amr_ros", strCmd);
         Utils::start_process(ros_manual_process, "amr_ros", "om_manual.launch.py");
         ui->pushButton_StartMap->setText("Make Route App is Running");
-
-        if(Global_DataSet::instance().sensorEnable("GnssEn"))
-        {
-            QString filePath = Global_DataSet::instance().sysPath()["ScriptPath"] + "/gps_visualizer.py";
-            QString pythonPath = "/bin/python3";
-            QString workDirectory = Global_DataSet::instance().sysPath()["ScriptPath"];
-
-            Utils::start_python_script(gnss_visual_process, pythonPath, workDirectory,filePath);
-        }
     }
     else
     {
         //end of make map
         Utils::terminate_process(ros_manual_process);
         Utils::terminate_process(ros_make_map_process);
-        Utils::terminate_python_script(gnss_visual_process);
         ui->pushButton_StartMap->setText("Press to Start Make Map App");
     }
 

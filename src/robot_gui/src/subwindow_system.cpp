@@ -34,6 +34,7 @@ void SubWindow_System::initConfig()
     ui->lineEdit_robotWidth->setText(robot_size["RobotWidth"]);
     ui->lineEdit_robotHeight->setText(robot_size["RobotHeight"]);
     ui->lineEdit_obstTolerance->setText(robot_size["RobotWidthTole"]);
+    ui->lineEdit_distanceLidarToGnss->setText(robot_size["DistanceLidarToGnss"]);
 
     gnss_ntrip = Global_DataSet::instance().gnssNtrip();
     ui->comboBox_ntripSite->setCurrentText(gnss_ntrip["NtripSite"]);
@@ -80,12 +81,14 @@ void SubWindow_System::saveConfig()
      robot_size["RobotWidth"] = ui->lineEdit_robotWidth->text();
      robot_size["RobotHeight"] = ui->lineEdit_robotHeight->text();
      robot_size["RobotWidthTole"] = ui->lineEdit_obstTolerance->text();
+     robot_size["DistanceLidarToGnss"] = ui->lineEdit_distanceLidarToGnss->text();
 
      settings_size.setValue("ObstRangeMin", robot_size["ObstRangeMin"]);
      settings_size.setValue("ObstRangeMax", robot_size["ObstRangeMax"]);
      settings_size.setValue("RobotWidth", robot_size["RobotWidth"]);
      settings_size.setValue("RobotHeight", robot_size["RobotHeight"]);
      settings_size.setValue("RobotWidthTole", robot_size["RobotWidthTole"]);
+     settings_size.setValue("DistanceLidarToGnss", robot_size["DistanceLidarToGnss"]);
      Global_DataSet::instance().setRobotSize(robot_size);
 
      //save all ntrip info

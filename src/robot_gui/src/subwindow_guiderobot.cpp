@@ -27,6 +27,7 @@ SubWindow_GuideRobot::SubWindow_GuideRobot(rclcpp::Node::SharedPtr node, QWidget
 
     odom_sub = node_->create_subscription<nav_msgs::msg::Odometry>(
                 "/odom", 10, std::bind(&SubWindow_GuideRobot::Odometry_CallBack, this, std::placeholders::_1));
+
     reached_goal_sub = node_->create_subscription<std_msgs::msg::Bool>(
                 "/reached_goal", 1, std::bind(&SubWindow_GuideRobot::reachedGoal_CallBack, this, std::placeholders::_1));
     connect(this, &SubWindow_GuideRobot::odomReceived, this, &SubWindow_GuideRobot::onSearchCurrLocation);
@@ -36,6 +37,8 @@ SubWindow_GuideRobot::SubWindow_GuideRobot(rclcpp::Node::SharedPtr node, QWidget
     obstacle_num_sub = node_->create_subscription<std_msgs::msg::Int32>(
                 "/obstacle_points_num", 10, std::bind(&SubWindow_GuideRobot::obstacle_CallBack, this, std::placeholders::_1));
     guide_pub = node_->create_publisher<std_msgs::msg::String>("/guide_control", 10);
+    voice_control_pub = node_->create_publisher<std_msgs::msg::String>("/voice_control", 10);
+    chatbot_pub = node_->create_publisher<std_msgs::msg::Bool>("/chatbot_wakeup", 10);
 
     rules_pub = node_->create_publisher<std_msgs::msg::String>("/navi_rules", 1);
     marker_pub = node_->create_publisher<visualization_msgs::msg::Marker>("/waypoint_marker", 10);
@@ -49,7 +52,7 @@ SubWindow_GuideRobot::SubWindow_GuideRobot(rclcpp::Node::SharedPtr node, QWidget
     //chatbot
     chatbot_state_sub = node_->create_subscription<std_msgs::msg::String>(
                 "/chatbot_state", 1, std::bind(&SubWindow_GuideRobot::chatbot_state_CallBack, this, std::placeholders::_1));
-    chatbot_request = node_->create_client<std_srvs::srv::SetBool>("/chatbot_wakeup");
+    // chatbot_request = node_->create_client<std_srvs::srv::SetBool>("/chatbot_wakeup");
     QString filePath = Global_DataSet::instance().sysPath()["ScriptPath"] + "/chatbot/chatbot.py";
     QString pythonPath = Global_DataSet::instance().sysPath()["PyPathVoice"] + "/bin/python";
     QString workDirectory = Global_DataSet::instance().sysPath()["ScriptPath"] + "/chatbot";
@@ -75,17 +78,22 @@ SubWindow_GuideRobot::SubWindow_GuideRobot(rclcpp::Node::SharedPtr node, QWidget
     person_info.near_distance = std::numeric_limits<double>::infinity();
     person_info.speed_rate = 0.0;
 
+    user_language.insert("日本語","ja");
+    user_language.insert("中文","zh");
+    user_language.insert("English", "en");
     //init sound manager
     audioManager = new AudioManager(this);
     system_path = Global_DataSet::instance().sysPath();
     obstacle_points_num = 0;
-    audioManager->setObstacleAudio(system_path["ResourcePath"] + "/obstacle_alert_ja.mp3");
-    audioManager->setGuideAudio(system_path["ResourcePath"] + "/guide_follow_up_ja.mp3");
+    audioManager->setObstacleAudio(system_path["ResourcePath"] + "/obstacle_alert_" + user_language[ui->comboBox_userLanguage->currentText()] + ".mp3");
+    audioManager->setGuideAudio(system_path["ResourcePath"] + "/guide_follow_up_" + user_language[ui->comboBox_userLanguage->currentText()] + ".mp3");
     audioManager->setLoopIntervalForGuide(2000);
     audioManager->setLoopIntervalForObstacle(2000);
     guide_annouse = false;
     connect(audioManager, &AudioManager::greetFinished, this, &SubWindow_GuideRobot::onGreetVoiceFinished);
     is_greet = false;
+
+    geoTool = new GeoServiceTool(node_, ui->textEdit);
 
 }
 
@@ -104,6 +112,8 @@ void SubWindow_GuideRobot::saveConfig()
     QSettings settings_navi("mikuni", "GuideRobot/Navi");
 
     settings_navi.setValue("GuideFunctionEn", ui->checkBox_cameraGuide->isChecked());
+    settings_navi.setValue("GuideByFace", ui->radioButton_faceDetect->isChecked());
+
 }
 
 void SubWindow_GuideRobot::initConfig()
@@ -112,7 +122,15 @@ void SubWindow_GuideRobot::initConfig()
     bool guide_function_en = settings_navi.value("GuideFunctionEn", "false").toBool();
     ui->checkBox_cameraGuide->setChecked(guide_function_en);
     Global_DataSet::instance().setGuideFunctionEn(guide_function_en);
+    bool guide_by_face = settings_navi.value("GuideByFace", "false").toBool();
+    ui->radioButton_faceDetect->setChecked(guide_by_face);
+    ui->radioButton_personDetect->setChecked(!guide_by_face);
 
+}
+
+void SubWindow_GuideRobot::onNavsatStartupCompleted()
+{
+    geoTool->setDatum(origin_lat, origin_lon, origin_alt);
 }
 
 void SubWindow_GuideRobot::onGreetVoiceFinished()
@@ -186,8 +204,14 @@ void SubWindow_GuideRobot::onSearchCurrLocation()
     ui->lineEdit_currentLocation->setText(current_location);
 
     //show targets
-    if((last_location != current_location) &&  location_list.contains(current_location))
+    if(init_location || (last_location != current_location) &&  location_list.contains(current_location))
     {
+        if(init_location)
+        {
+            init_location = false;
+            baseModel->clear();
+        }
+
         for(const Route_Info &route: route_list)
         {
             if(route.start == current_location)
@@ -220,7 +244,7 @@ void SubWindow_GuideRobot::onSetNaviRules()
         QVector3D rule_waypoint, waypoint_relative;
         QVector3D robot_pos(robot_cur_pose.pos_x, robot_cur_pose.pos_y, robot_cur_pose.pos_z);
 
-        if(rule_state.status == "out")
+        if(rule_state.status == "disabled")
         {
             rule_waypoint.setX(rules_route.rules_list.at(rule_state.cnt).pos_in.x);
             rule_waypoint.setY(rules_route.rules_list.at(rule_state.cnt).pos_in.y);
@@ -236,10 +260,10 @@ void SubWindow_GuideRobot::onSetNaviRules()
                 std_msgs::msg::String msg;
                 msg.data = msg_tmp.toStdString();
                 rules_pub->publish(msg);
-                rule_state.status = "in";
+                rule_state.status = "enabled";
             }
         }
-        else // "in"
+        else // "enabled"
         {
             rule_waypoint.setX(rules_route.rules_list.at(rule_state.cnt).pos_out.x);
             rule_waypoint.setY(rules_route.rules_list.at(rule_state.cnt).pos_out.y);
@@ -255,7 +279,7 @@ void SubWindow_GuideRobot::onSetNaviRules()
                 std_msgs::msg::String msg;
                 msg.data = msg_tmp.toStdString();
                 rules_pub->publish(msg);
-                rule_state.status = "out";
+                rule_state.status = "disabled";
                 rule_state.cnt++;
             }
         }
@@ -279,21 +303,8 @@ void SubWindow_GuideRobot::onGuideCameraStateChanged(const int arg)
 {
     bool state = (arg == 2) ? true : false;
     Global_DataSet::instance().setSensorEnable("GuideCameraEn", state);
-    //startup guide camera
-    if(state && ui->pushButton_startRobot->isChecked())
-    {
-        QString filePath = Global_DataSet::instance().sysPath()["ScriptPath"] + "/person_detect.py";
-        QString pythonPath = Global_DataSet::instance().sysPath()["PyPathCamera"] + "/bin/python";
-        QString workDirectory = Global_DataSet::instance().sysPath()["ScriptPath"];
-
-        Utils::start_python_script(detect_process,pythonPath, workDirectory, filePath);
-    }
-    //stop camera
-    if(!state)
-    {
-        Utils::terminate_python_script(detect_process);
-    }
     ui->checkBox_cameraGuide->setEnabled(state);
+
 }
 
 void SubWindow_GuideRobot::chatbot_state_CallBack(const std_msgs::msg::String& msg)
@@ -304,6 +315,23 @@ void SubWindow_GuideRobot::chatbot_state_CallBack(const std_msgs::msg::String& m
 
     if(state == "sleep")
     {
+        if(qa_msg.contains("start"))
+        {
+            // voice control enable: start
+            std_msgs::msg::String voice_control_msg;
+            voice_control_msg.data = "voice_control_en:1;start;";
+            voice_control_pub->publish(voice_control_msg);
+            ui->textEdit->append("Control Cmd:start");
+
+        }
+        else if(qa_msg.contains("stop"))
+        {
+            //voice control enable: stop
+            std_msgs::msg::String voice_control_msg;
+            voice_control_msg.data = "voice_control_en:1;stop;";
+            voice_control_pub->publish(voice_control_msg);
+            ui->textEdit->append("Control Cmd:stop");
+        }
 
     }
     else if(state == "ready")
@@ -399,9 +427,9 @@ void SubWindow_GuideRobot::Odometry_CallBack(const nav_msgs::msg::Odometry& odom
         marker.pose.orientation.z = 0.0;
         marker.pose.orientation.w = 1.0;
         marker.color.a = 1.0;
-        marker.color.r = 1.0;
-        marker.color.g = 0.0;
-        marker.color.b = 0.0;
+        marker.color.r = 0.0;
+        marker.color.g = 1.0;
+        marker.color.b = 1.0;
         marker_pub->publish(marker);
     }
 
@@ -503,7 +531,11 @@ void SubWindow_GuideRobot::reachedGoal_CallBack(const std_msgs::msg::Bool& msg)
     reached_goal = msg.data;
     if (reached_goal)
     {
+        ui->pushButton_NaviGo->blockSignals(true);
         ui->pushButton_NaviGo->setChecked(false);
+        ui->pushButton_NaviGo->blockSignals(false);
+
+        on_pushButton_NaviGo_toggled(false);
     }
 }
 
@@ -632,15 +664,17 @@ void SubWindow_GuideRobot::on_pushButton_startRobot_toggled(bool checked)
     if(checked)
     {
         //startup to make route app
-        QString map_path = Global_DataSet::instance().sysPath()["MapPath"] + "/" + m_mapName + "/GlobalMap.pcd";
+        QString map_path = Global_DataSet::instance().sysPath()["MapPath"] + "/" + m_mapName;
+        bool gnss_enable = (Global_DataSet::instance().sensorEnable("GnssEn") && ui->checkBox_naviWithGnss->isChecked());
 
         QString strCmd = QString("om_navi_guide_robot.launch.py")
                 + " v_max:=" + ui->comboBox_maxVel->currentText()
                 + " OBST_HIGHT_MIN_Z:=" + Global_DataSet::instance().robotSize()["ObstRangeMin"]
                 + " OBST_HIGHT_MAX_Z:=" + Global_DataSet::instance().robotSize()["ObstRangeMax"]
                 + " robot_width_size:=" + Global_DataSet::instance().robotSize()["RobotWidth"]
+                + " enable_gnss:=" + (gnss_enable ? "true" : "false")
 
-                + " globalmap_path:=" + map_path
+                + " globalmap_path:=" + map_path + "/GlobalMap.pcd"
                 + " init_px:=" + QString::number(init_pose.pos_x,'f')
                 + " init_py:=" + QString::number(init_pose.pos_y,'f')
                 + " init_pz:=" + QString::number(init_pose.pos_z,'f')
@@ -649,21 +683,50 @@ void SubWindow_GuideRobot::on_pushButton_startRobot_toggled(bool checked)
                 + " init_oz:=" + QString::number(init_pose.ori_z,'f')
                 + " init_ow:=" + QString::number(init_pose.ori_w,'f');
 
+        if(gnss_enable)
+        {
+            QString filePath = map_path + "/gnss_map_origin.txt";
+            double gpsConvThreshold = Global_DataSet::instance().gnssNtrip()["ConvThreshold"].toDouble();
+
+            if(!geoTool->getDatumFromFile(filePath, origin_lat, origin_lon, origin_alt, yaw_offset))
+            {
+                QMessageBox::warning(this,"Warning","Load Datum from file Failed! check gnss_map_origin.txt file");
+                return;
+            }
+            strCmd += " latitude:=" + QString::number(origin_lat, 'f', 6)
+                    + " longitude:=" + QString::number(origin_lon,'f',6)
+                    + " altitude:=" + QString::number(origin_alt,'f',2)
+                    + " yaw_offset:=" + QString::number(yaw_offset,'f',6)
+                    + " gps_cov_threshold:=" + QString::number(gpsConvThreshold,'f',3);
+        }
+
         Utils::start_process(guide_robot_process, "amr_ros", strCmd);
 
         //startup guide camera
         QString filePath = Global_DataSet::instance().sysPath()["ScriptPath"] + "/person_detect.py";
-        QString pythonPath = Global_DataSet::instance().sysPath()["PyPathCamera"] + "/bin/python";
         QString workDirectory = Global_DataSet::instance().sysPath()["ScriptPath"];
-        if(Global_DataSet::instance().sensorEnable("GuideCameraEn"))
+        QString pythonPath = Global_DataSet::instance().sysPath()["PyPathCamera"] + "/bin/python";
+        if(ui->radioButton_faceDetect->isChecked())
+        {
+            filePath = Global_DataSet::instance().sysPath()["ScriptPath"] + "/face_detect/inference_cam_ros.py";
+            workDirectory = Global_DataSet::instance().sysPath()["ScriptPath"] + "/face_detect";
+        }
+        if(Global_DataSet::instance().sensorEnable("GuideCameraEn") && ui->checkBox_cameraGuide->isChecked())
         {
             Utils::start_python_script(detect_process, pythonPath, workDirectory,filePath);
         }
 
         ui->pushButton_startRobot->setText("Robot App is Running");
-        audioManager->setGreetAudio(system_path["ResourcePath"] + "/greet_startup_navi_ja.mp3");
+        audioManager->setGreetAudio(system_path["ResourcePath"] + "/greet_startup_navi_" + user_language[ui->comboBox_userLanguage->currentText()] + ".mp3");
         audioManager->playGreet();
         is_greet = true;
+
+        init_location = true;
+
+        //voice control enable: false
+        std_msgs::msg::String voice_control_msg;
+        voice_control_msg.data = "voice_control_en:0;stop;";
+        voice_control_pub->publish(voice_control_msg);
     }
     else
     {
@@ -674,7 +737,7 @@ void SubWindow_GuideRobot::on_pushButton_startRobot_toggled(bool checked)
         Utils::terminate_process(guide_robot_process);
         ui->pushButton_startRobot->setText("Press to Start Robot App");
         baseModel->clear();
-        audioManager->setGreetAudio(system_path["ResourcePath"] + "/greet_finish_navi_ja.mp3");
+        audioManager->setGreetAudio(system_path["ResourcePath"] + "/greet_finish_navi_" + user_language[ui->comboBox_userLanguage->currentText()] + ".mp3");
         audioManager->playGreet();
 
     }
@@ -683,29 +746,9 @@ void SubWindow_GuideRobot::on_pushButton_startRobot_toggled(bool checked)
 
 void SubWindow_GuideRobot::wakeupChatbot(bool req)
 {
-    // 等待 service 可用
-    if (!chatbot_request->wait_for_service(std::chrono::seconds(3))) {
-        RCLCPP_ERROR(node_->get_logger(), "Service not available.");
-        return;
-    }
-
-    // 发起请求
-    auto request = std::make_shared<std_srvs::srv::SetBool::Request>();
-    request->data = req;  // 请求数据
-
-    // 调用服务
-    auto future = chatbot_request->async_send_request(request);
-
-    if (rclcpp::spin_until_future_complete(node_, future) == rclcpp::FutureReturnCode::SUCCESS)
-    {
-        RCLCPP_INFO(node_->get_logger(), "Set chatbot ready");
-    }
-    else
-    {
-        RCLCPP_WARN(node_->get_logger(), "Set chatbot failed.");
-        QMessageBox::warning(this,"Warning","Set chatbot failed.");
-    }
-
+    std_msgs::msg::Bool msg;
+    msg.data = req;
+    chatbot_pub->publish(msg);
 }
 
 void SubWindow_GuideRobot::on_pushButton_NaviGo_toggled(bool checked)
@@ -717,7 +760,9 @@ void SubWindow_GuideRobot::on_pushButton_NaviGo_toggled(bool checked)
         if(navi_start == "unknown")
         {
             QMessageBox::warning(this,"Warning","Current location is unknown, Please init Robot postion on rviz first!");
+            ui->pushButton_NaviGo->blockSignals(true);
             ui->pushButton_NaviGo->setChecked(false);
+            ui->pushButton_NaviGo->blockSignals(false);
             return;
         }
         QString route_path = Global_DataSet::instance().sysPath()["MapPath"] + "/" + m_mapName
@@ -725,7 +770,9 @@ void SubWindow_GuideRobot::on_pushButton_NaviGo_toggled(bool checked)
         if(!QFile::exists(route_path))
         {
             QMessageBox::warning(this,"Warning","Route file " + fileName + " not exist!");
+            ui->pushButton_NaviGo->blockSignals(true);
             ui->pushButton_NaviGo->setChecked(false);
+            ui->pushButton_NaviGo->blockSignals(false);
             return;
         }
 
@@ -737,7 +784,9 @@ void SubWindow_GuideRobot::on_pushButton_NaviGo_toggled(bool checked)
         {
             RCLCPP_WARN(node_->get_logger(), "Service reset_path not available.");
             QMessageBox::warning(this,"Warning","Service reset_path not available.");
+            ui->pushButton_NaviGo->blockSignals(true);
             ui->pushButton_NaviGo->setChecked(false);
+            ui->pushButton_NaviGo->blockSignals(false);
             return;
         }
 
@@ -754,19 +803,21 @@ void SubWindow_GuideRobot::on_pushButton_NaviGo_toggled(bool checked)
         {
             RCLCPP_WARN(node_->get_logger(), "Reset path failed.");
             QMessageBox::warning(this,"Warning","Reset path failed.");
+            ui->pushButton_NaviGo->blockSignals(true);
             ui->pushButton_NaviGo->setChecked(false);
+            ui->pushButton_NaviGo->blockSignals(false);
             return;
         }
 
         //Init route rules
         rules_route = route_list[navi_start + "->" + navi_target];
         rule_state.cnt = 0;
-        rule_state.status = "out";
+        rule_state.status = "disabled";
 
-        wakeupChatbot(false); //sleep mode
+        wakeupChatbot(false); //control mode
         ui->pushButton_NaviGo->setText("Moving to " + navi_target);
-        audioManager->setGreetAudio(system_path["ResourcePath"] + "/goto_next_target_ja.mp3");
-        audioManager->playGreet();
+        audioManager->setGreetAudio(system_path["ResourcePath"] + "/goto_next_target_" + user_language[ui->comboBox_userLanguage->currentText()] +  ".mp3");
+        audioManager->playGreet();     
 
     }
     else
@@ -776,9 +827,14 @@ void SubWindow_GuideRobot::on_pushButton_NaviGo_toggled(bool checked)
         ui->pushButton_NaviGo->setChecked(false);
         ui->pushButton_NaviGo->blockSignals(false);
 
-        audioManager->setGreetAudio(system_path["ResourcePath"] + "/essay/" + navi_target + "_ja.mp3");
+        audioManager->setGreetAudio(system_path["ResourcePath"] + "/essay/" + navi_target + "_" + user_language[ui->comboBox_userLanguage->currentText()] + ".mp3");
         audioManager->playGreet();
         wakeupChatbot(true);  // 唤醒模式
+        //voice control enable: false
+        std_msgs::msg::String voice_control_msg;
+        voice_control_msg.data = "voice_control_en:0;stop;";
+        voice_control_pub->publish(voice_control_msg);
+
     }
 }
 
@@ -786,5 +842,13 @@ void SubWindow_GuideRobot::on_checkBox_cameraGuide_stateChanged(int arg1)
 {
     bool state = (arg1 == 2) ? true : false;
     Global_DataSet::instance().setGuideFunctionEn(state);
+}
+
+
+void SubWindow_GuideRobot::on_comboBox_userLanguage_currentTextChanged(const QString &arg1)
+{
+    audioManager->setObstacleAudio(system_path["ResourcePath"] + "/obstacle_alert_" + user_language[arg1] + ".mp3");
+    audioManager->setGuideAudio(system_path["ResourcePath"] + "/guide_follow_up_" + user_language[arg1] + ".mp3");
+
 }
 

@@ -25,14 +25,12 @@ public:
     ~SubWindow_GeoServiceTool();
 
 public slots:
-    void onNewEnuYawUpdated(bool isValid, double yaw_rad);
     void onNewFixReceived(int status, double conv, double lat, double lon, double alt);
 
 private slots:
     void on_pushButton_setDatum_clicked();
 
     void on_pushButton_fromLL_clicked();
-    void on_pushButton_presetMapOrigin_toggled(bool checked);
 
     void on_pushButton_getGnssOrigin_clicked();
 
@@ -42,23 +40,21 @@ private slots:
 
     void on_pushButton_saveMapOriginFile_clicked();
 
-private:
-    struct GnssPostion
-    {
-        double lat;
-        double lon;
-        double alt;
-        double yaw_offset;
-    };
-    GnssPostion m_gnssPostion;
-    GnssPostion m_mapOriginPostion;    
-    GnssPostion m_aheadPointPostion;
+    void on_pushButton_getCurrGnssPos_clicked();
+
+public:
+    GeoServiceTool::GnssPostion m_gnssPostion;
+    GeoServiceTool::GnssPostion m_mapOriginPostion;
+    GeoServiceTool::GnssPostion m_aheadPointPostion;
 
 
 private:
     Ui::SubWindow_GeoServiceTool *ui;
     rclcpp::Node::SharedPtr node_;
     GeoServiceTool *geoTool;
+    double gpsConvThreshold;
+    bool is_gnssValid;
+
 };
 
 #endif // SUBWINDOW_GEOSERVICETOOL_H

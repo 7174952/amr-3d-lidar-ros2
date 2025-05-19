@@ -25,7 +25,7 @@ find_package(om_cart REQUIRED)
 
 
 # 查找 Qt5 5.15 的 Widgets 和 Multimedia 模块
-find_package(Qt5 5.15 REQUIRED COMPONENTS Widgets Multimedia)
+find_package(Qt5 5.15 REQUIRED COMPONENTS Widgets Multimedia MultimediaWidgets)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
@@ -43,6 +43,7 @@ set(UI_FILES
   ui/subwindow_makeroute.ui
   ui/subwindow_guiderobot.ui
   ui/subwindow_geoservicetool.ui
+  ui/subwindow_facelogin.ui
 
 )
 
@@ -69,6 +70,7 @@ add_executable(${PROJECT_NAME}_node
     src/subwindow_guiderobot.cpp
     src/audiomanager.cpp
     src/subwindow_geoservicetool.cpp
+    src/subwindow_facelogin.cpp
     ${UI_HEADERS})
 ament_target_dependencies(${PROJECT_NAME}_node rclcpp std_msgs geographic_msgs robot_localization
                             sensor_msgs geometry_msgs nav_msgs std_srvs tf2_ros tf2_eigen visualization_msgs om_cart)
@@ -80,7 +82,7 @@ target_include_directories(${PROJECT_NAME}_node PUBLIC
 target_compile_features(${PROJECT_NAME}_node PUBLIC c_std_99 cxx_std_17)
 
 # 链接 Qt 和 OpenCV 库
-target_link_libraries(${PROJECT_NAME}_node Qt5::Widgets Qt5::Multimedia Qt5::Core ${OpenCV_LIBS} ${BULLET_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_node Qt5::Widgets Qt5::Multimedia Qt5::MultimediaWidgets Qt5::Core ${OpenCV_LIBS} ${BULLET_LIBRARIES})
 
 install(
   DIRECTORY launch

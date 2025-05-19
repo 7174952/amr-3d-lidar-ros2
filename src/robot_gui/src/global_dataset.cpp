@@ -86,3 +86,4 @@ bool Global_DataSet::guideFunctionEn() const
 {
     return m_guideFunctionEn;
 }
+

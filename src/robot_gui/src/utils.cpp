@@ -175,6 +175,42 @@ GeoServiceTool::GeoServiceTool(rclcpp::Node::SharedPtr node, QTextEdit* textEdit
                 std::bind(&GeoServiceTool::odomCallback, this, std::placeholders::_1));
 }
 
+bool GeoServiceTool::getDatumFromFile(QString filePath, double &datum_lat, double &datum_lon, double &datum_alt, double &yaw_offset)
+{
+    // QString filePath = map_path + "/gnss_map_origin.txt";
+    QFile file(filePath);
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return false;
+    double yaw_offset_deg;
+    QTextStream in(&file);
+    while(!in.atEnd())
+    {
+        QString str = in.readLine().trimmed();
+        if(str.contains("lat")) datum_lat = str.split(":").at(1).toDouble();
+        if(str.contains("lon")) datum_lon = str.split(":").at(1).toDouble();
+        if(str.contains("alt")) datum_alt = str.split(":").at(1).toDouble();
+        if(str.contains("yaw_offset"))
+        {
+            yaw_offset_deg = str.split(":").at(1).toDouble();
+            yaw_offset = qDegreesToRadians(yaw_offset_deg);
+        }
+    }
+    file.close();
+
+    if(textEdit_geoShowMsg_ != nullptr)
+    {
+        // 安全地发到 UI 线程更新 QTextEdit
+        QString text = QString("Load Datum \nlat:%1\nlon:%2\nalt:%3\nyaw_offset(deg):%4")
+                .arg(datum_lat, 0, 'f',6)
+                .arg(datum_lon, 0, 'f',6)
+                .arg(datum_alt, 0, 'f',2)
+                .arg(yaw_offset_deg, 0, 'f',6);
+        textEdit_geoShowMsg_->setPlainText(text);
+    }
+
+    return true;
+}
+
 void GeoServiceTool::setDatum(double lat, double lon, double alt)
 {
     auto req = std::make_shared<robot_localization::srv::SetDatum::Request>();
@@ -337,4 +373,22 @@ void GeoServiceTool::publishMarker(const geometry_msgs::msg::Point &point)
     marker.color.g = 0.8;
     marker.color.b = 0.1;
     marker_pub_->publish(marker);
+}
+
+double GeoServiceTool::getGnssMoveOrientalDeg(GnssPostion aheadPointPos, GnssPostion refPointPos)
+{
+    // 地球半径（米）
+    const double R = 6378137.0;
+    double dLat = qDegreesToRadians(aheadPointPos.lat - refPointPos.lat);
+    double dLon = qDegreesToRadians(aheadPointPos.lon - refPointPos.lon);
+    double latRefRad = qDegreesToRadians(refPointPos.lat);
+
+    double x_east = R * dLon * qCos(latRefRad);   // 东方向
+    double y_north = R * dLat;                    // 北方向
+
+    double angle_rad = qAtan2(y_north, x_east);  // atan2(Δ北, Δ东)
+    double angle_deg = qRadiansToDegrees(angle_rad);
+    angle_deg =  fmod(angle_deg + 360.0, 360.0);       // 归一化到 [0, 360)
+    return angle_deg;
+
 }

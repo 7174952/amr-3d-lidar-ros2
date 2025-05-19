@@ -155,6 +155,8 @@ public slots:
      void handleOutput();
      void handleError();
 #endif
+     void onNavsatStartupCompleted();
+
 
 private slots:
     void on_pushButton_startRobot_toggled(bool checked);
@@ -165,6 +167,8 @@ private slots:
     void onSetNaviRules();
 
     void on_checkBox_cameraGuide_stateChanged(int arg1);
+
+    void on_comboBox_userLanguage_currentTextChanged(const QString &arg1);
 
 private:
     void Odometry_CallBack(const nav_msgs::msg::Odometry& odom);
@@ -198,6 +202,7 @@ private:
     QString current_location;
     QString navi_start;
     QString navi_target;
+    bool init_location;
     double final_direct;
     bool reached_goal;
 
@@ -277,23 +282,31 @@ private:
     //chatbot
     QString chatbot_state;
 
+    QMap<QString, QString> user_language;
+
 private:
     Ui::SubWindow_GuideRobot *ui;
     rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_pub;
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr rules_pub;
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr guide_pub;
+    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr chatbot_pub;
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr voice_control_pub;
 
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub;
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr reached_goal_sub;
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr person_detect_sub;
     rclcpp::Subscription<std_msgs::msg::Int32>::SharedPtr obstacle_num_sub;
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr chatbot_state_sub;
-    rclcpp::Client<std_srvs::srv::SetBool>::SharedPtr chatbot_request;
 
     rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr waypoints_pub;
     rclcpp::Client<std_srvs::srv::Empty>::SharedPtr reset_client;
 
     int idx_;
+    GeoServiceTool *geoTool;
+    double origin_lat;
+    double origin_lon;
+    double origin_alt;
+    double yaw_offset;
 
 
 };

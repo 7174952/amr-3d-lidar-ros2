@@ -7,7 +7,7 @@ SubWindow_MakeRoute::SubWindow_MakeRoute(rclcpp::Node::SharedPtr node, QWidget *
 {
     ui->setupUi(this);
 
-    ros_make_route_process = new QProcess(this);;
+    ros_make_route_process = new QProcess(this);
     ros_manual_process = new QProcess(this);
 
     sub_odom = node_->create_subscription<nav_msgs::msg::Odometry>(
@@ -20,6 +20,9 @@ SubWindow_MakeRoute::SubWindow_MakeRoute(rclcpp::Node::SharedPtr node, QWidget *
     last_point.resize(7);
     last_point.fill(0.0);
     odom_distance_now = 0.0;
+
+    geoTool = new GeoServiceTool(node_, ui->textEdit_makeRouteMsg);
+    gpsConvThreshold = Global_DataSet::instance().gnssNtrip()["ConvThreshold"].toDouble();
 
 }
 
@@ -96,8 +99,8 @@ void SubWindow_MakeRoute::Odometry_CallBack(const nav_msgs::msg::Odometry& odom)
         marker.pose.orientation.z = 0.0;
         marker.pose.orientation.w = 1.0;
         marker.color.a = 1.0;
-        marker.color.r = 1.0;
-        marker.color.g = 0.0;
+        marker.color.r = 0.0;
+        marker.color.g = 1.0;
         marker.color.b = 0.0;
         marker_pub->publish(marker);
     }
@@ -150,6 +153,11 @@ void SubWindow_MakeRoute::updateMapName(const QString& newMapName)
 
 }
 
+void SubWindow_MakeRoute::onNavsatStartupCompleted()
+{
+    geoTool->setDatum(origin_lat, origin_lon, origin_alt);
+}
+
 void SubWindow_MakeRoute::on_pushButton_StartRoute_toggled(bool checked)
 {
     if(checked)
@@ -164,17 +172,36 @@ void SubWindow_MakeRoute::on_pushButton_StartRoute_toggled(bool checked)
         last_point[6] = robot_cur_pose.ori_w;
 
         //startup to make route app
-        QString map_path = Global_DataSet::instance().sysPath()["MapPath"] + "/" + m_mapName + "/GlobalMap.pcd";
+        QString map_path = Global_DataSet::instance().sysPath()["MapPath"] + "/" + m_mapName;
 
+        bool gnss_enable = (Global_DataSet::instance().sensorEnable("GnssEn") && ui->checkBox_naviWithGnss->isChecked());
         QString strCmd = QString("om_navi_make_route.launch.py")
-                + " globalmap_path:=" + map_path
+                + " globalmap_path:=" + map_path + "/GlobalMap.pcd"
                 + " init_px:=" + QString::number(init_pose.pos_x,'f')
                 + " init_py:=" + QString::number(init_pose.pos_y,'f')
                 + " init_pz:=" + QString::number(init_pose.pos_z,'f')
                 + " init_ox:=" + QString::number(init_pose.ori_x,'f')
                 + " init_oy:=" + QString::number(init_pose.ori_y,'f')
                 + " init_oz:=" + QString::number(init_pose.ori_z,'f')
-                + " init_ow:=" + QString::number(init_pose.ori_w,'f');
+                + " init_ow:=" + QString::number(init_pose.ori_w,'f')
+                + " enable_gnss:=" + (gnss_enable ? "true" : "false");
+
+        if(gnss_enable)
+        {
+            QString filePath = map_path + "/gnss_map_origin.txt";
+            gpsConvThreshold = Global_DataSet::instance().gnssNtrip()["ConvThreshold"].toDouble();
+
+            if(!geoTool->getDatumFromFile(filePath, origin_lat, origin_lon, origin_alt, yaw_offset))
+            {
+                QMessageBox::warning(this,"Warning","Load Datum from file Failed! check gnss_map_origin.txt file");
+                return;
+            }
+            strCmd += " latitude:=" + QString::number(origin_lat, 'f', 6)
+                    + " longitude:=" + QString::number(origin_lon,'f',6)
+                    + " altitude:=" + QString::number(origin_alt,'f',2)
+                    + " yaw_offset:=" + QString::number(yaw_offset,'f',6)
+                    + " gps_cov_threshold:=" + QString::number(gpsConvThreshold,'f',3);
+        }
 
         Utils::start_process(ros_make_route_process, "amr_ros", strCmd);
         Utils::start_process(ros_manual_process, "amr_ros", "om_manual.launch.py");

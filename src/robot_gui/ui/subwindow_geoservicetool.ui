@@ -31,7 +31,7 @@
       <x>10</x>
       <y>30</y>
       <width>281</width>
-      <height>151</height>
+      <height>159</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -68,6 +68,13 @@
         <widget class="QLineEdit" name="lineEdit_altitude"/>
        </item>
       </layout>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton_getCurrGnssPos">
+       <property name="text">
+        <string>Get Current Gnss Postion</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="pushButton_setDatum">
