@@ -1,7 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String
-from std_srvs.srv import SetBool  # 改为SetBool
+from std_msgs.msg import String, Bool
 import json
 
 class ChatBotNode(Node):
@@ -11,18 +10,19 @@ class ChatBotNode(Node):
         # Publisher
         self.publisher_ = self.create_publisher(String, 'chatbot_state', 10)
 
-        # Service (SetBool)
-        self.srv = self.create_service(
-            SetBool, 'chatbot_wakeup',
-            self.set_bool_callback)
-        self.req_wakeup = False
+        # Subscriber (取代原 SetBool 服务)
+        self.subscription = self.create_subscription(
+            Bool,
+            'chatbot_wakeup',
+            self.wakeup_callback,
+            10)
+        self.subscription  # 防止未使用警告
 
-    def set_bool_callback(self, request, response):
-        self.get_logger().info(f'收到布尔请求: {request.data}')
-        response.success = True
-        response.message = ''
-        self.req_wakeup = request.data
-        return response
+        self.req_wakeup = False  # 默认状态
+
+    def wakeup_callback(self, msg: Bool):
+        self.req_wakeup = msg.data
+        self.get_logger().info(f'接收到唤醒指令: {self.req_wakeup}')
 
     def publish_text(self, text: str):
         msg = String()

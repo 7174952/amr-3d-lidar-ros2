@@ -30,7 +30,7 @@ class HotwordDetector:
             frames_per_buffer=self.porcupine.frame_length,
         )
 
-    def _play_silence(self, duration_sec=0.2):
+    def _play_silence(self, duration_sec=0.5):
         silence = AudioSegment.silent(duration=duration_sec * 1000)  # pydub是毫秒单位
         play(silence)
 

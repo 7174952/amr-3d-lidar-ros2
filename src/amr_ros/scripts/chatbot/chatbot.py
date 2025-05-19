@@ -4,6 +4,7 @@ from chatbot_node import ChatBotNode
 import config
 from hotword_detector import HotwordDetector
 from recorder import record_audio
+from recorder_control_command import record_audio_control_command
 from speech_to_text import SpeechToText
 from chat_gpt import ChatGPT
 from text_to_speech import TextToSpeech
@@ -18,16 +19,20 @@ def play_ding(filePath):
     sd.play(data, fs)
     sd.wait()
 
-def play_silence(duration_sec=0.2):
+def play_silence(duration_sec=0.5):
     silence = AudioSegment.silent(duration=duration_sec * 1000)
     play(silence)
 
 async def chatbot_logic(node: ChatBotNode):
+    with open("threshold.txt", "r") as f:
+        threshold = float(f.read().strip())
+        print(f"读取的阈值是: {threshold}")
+
     hotword_detector = HotwordDetector(node)
     stt = SpeechToText()
     chat_gpt = ChatGPT()
     tts = TextToSpeech()
-
+    time.sleep(10)
     print("Enter Sleep Mode!")
     curr_state = "state:sleep;"
     node.publish_text(curr_state)
@@ -35,8 +40,37 @@ async def chatbot_logic(node: ChatBotNode):
     while rclpy.ok():
         rclpy.spin_once(node, timeout_sec=0.01)
 
-        if(not node.req_wakeup): #sleep
-            continue
+        if(not node.req_wakeup): #sleep (control mode)
+            if threshold > 0.0 and threshold < 5000 :
+                audio_path = record_audio_control_command(silence_threshold=threshold, ros_node=node)
+            else:
+                audio_path = record_audio_control_command()
+            rclpy.spin_once(node,  timeout_sec=0.001)
+            if node.req_wakeup:
+                continue #exit sleep(control mode)
+
+            user_text, lang = stt.transcribe(audio_path)
+            rclpy.spin_once(node,  timeout_sec=0.001)
+            if node.req_wakeup:
+                continue #exit sleep(control mode)
+
+            if user_text.strip() == "" or user_text.strip() == "Thank you very much." or user_text.strip() == "Thank you." or lang not in ["en", "ja", "zh"]:
+                continue
+            elif any(word in user_text for word in ["走って", "はしって", "スタート", "前进","开始","出发","start", "START","Start"]):
+                curr_state = "state:sleep;" + "start"
+                node.publish_text(curr_state)
+                play_silence()
+                play_ding(config.HOTWORD_RESP_PATH)
+                continue
+            elif any(word in user_text for word in ["止まって","とまって","泊まって","停まって", "留まって","待って","まって","待て","まて","ストップ","停车","stop","STOP","Stop"]):
+                curr_state = "state:sleep;" + "stop"
+                node.publish_text(curr_state)
+                play_silence()
+                play_ding(config.HOTWORD_RESP_PATH)
+                continue
+            else:
+                continue
+            node.get_logger().info(f"识别结果: {user_text}")
         else: #wakeup
             if curr_state == "state:sleep;":
                 curr_state = "state:ready;"
@@ -54,8 +88,10 @@ async def chatbot_logic(node: ChatBotNode):
                 curr_state = "state:wakeup;"
                 node.publish_text(curr_state)
                 # time.sleep(0.1)
-
-            audio_path = record_audio()
+            if threshold > 0.0 and threshold < 5000 :
+                audio_path = record_audio(silence_threshold=threshold)
+            else:
+                audio_path = record_audio()
             rclpy.spin_once(node,  timeout_sec=0.001)
             if not node.req_wakeup:
                 curr_state = "state:sleep;"

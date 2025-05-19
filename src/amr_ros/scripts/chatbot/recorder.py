@@ -12,6 +12,7 @@ def record_audio(filename="input.wav", fs=config.SAMPLE_RATE,
                  silence_threshold=100,
                  silence_duration=1.5):
 
+    print(f"silence_threshold:{silence_threshold}")
     print("🎙️ 开始录音...")
 
     buffer = []
