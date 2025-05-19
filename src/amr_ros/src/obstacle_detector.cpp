@@ -37,6 +37,7 @@ private:
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr sub_cmdRaw;
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr sub_naviRules;
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr sub_guide;
+    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr sub_voice_control;
 
     struct Navi_Rules
     {
@@ -52,6 +53,9 @@ private:
         double speed_rate;
     };
     Guide_Info guide_info;
+
+    bool voice_control_en;
+    QString voice_control_cmd;
 
     double OBST_HIGHT_MIN_Z;
     double OBST_HIGHT_MAX_Z;
@@ -71,6 +75,7 @@ private:
     void cmdRaw_Callback(const geometry_msgs::msg::Twist::SharedPtr msg);
     void naviRules_Callback(const std_msgs::msg::String::SharedPtr msg);
     void guideControl_Callback(const std_msgs::msg::String::SharedPtr msg);
+    void voiceControl_Callback(const std_msgs::msg::String::SharedPtr msg);
 };
 
 PclObstDetector::PclObstDetector() : Node("pcl_obst_detector")
@@ -107,6 +112,10 @@ PclObstDetector::PclObstDetector() : Node("pcl_obst_detector")
         "/guide_control", 10,
         std::bind(&PclObstDetector::guideControl_Callback, this, std::placeholders::_1)
     );
+    sub_voice_control = this->create_subscription<std_msgs::msg::String>(
+                "/voice_control", 10,
+                std::bind(&PclObstDetector::voiceControl_Callback, this, std::placeholders::_1)
+            );
     navi_rules = {false, 0.0, 0.0};
     guide_info = {false, 0.0};
 }
@@ -206,6 +215,14 @@ void PclObstDetector::cloudPoints_Callback(const sensor_msgs::msg::PointCloud2::
     pub_obst_points->publish(output);
 }
 
+void PclObstDetector::voiceControl_Callback(const std_msgs::msg::String::SharedPtr msg)
+{
+    QStringList voice_control_msg = QString::fromStdString(msg->data).split(";",Qt::SkipEmptyParts);
+    voice_control_en = voice_control_msg.at(0).split(":").at(1).toUInt();
+    voice_control_cmd = voice_control_msg.at(1);
+
+}
+
 void PclObstDetector::guideControl_Callback(const std_msgs::msg::String::SharedPtr msg)
 {
     QStringList guide_msg = QString::fromStdString(msg->data).split(";",Qt::SkipEmptyParts);
@@ -231,6 +248,12 @@ void PclObstDetector::cmdRaw_Callback(const geometry_msgs::msg::Twist::SharedPtr
     if(navi_rules.rule_enable)
     {
         cmd_vel.linear.x = std::min(navi_rules.limit_max_vel, cmd_vel.linear.x);
+    }
+
+    if(voice_control_en && voice_control_cmd == "stop")
+    {
+        cmd_vel.linear.x = 0;
+        cmd_vel.angular.z = 0;
     }
 
     if (cmd_vel.angular.z != 0)
