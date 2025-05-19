@@ -46,6 +46,13 @@ def generate_launch_description():
         arguments='0.1 0.0 0.0 0.0 0.0 0.0 1.0 base_link livox_frame'.split(' '),
     )
 
+    tf2_ros_base_link_to_gps = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='tf2_ros_base_link_to_gps',
+        arguments='0.0 0.0 0.84 0.0 0.0 0.0 1.0 base_link gps'.split(' '),
+    )
+
     livox_rviz = Node(
         package='rviz2',
         executable='rviz2',
@@ -72,7 +79,9 @@ def generate_launch_description():
                 plugin='hdl_localization::HdlLocalizationNode',
                 name='HdlLocalizationNode',
                 # remapping
-                remappings=[('/velodyne_points', points_topic), ('/gpsimu_driver/imu_data', imu_topic)],
+                remappings=[('/velodyne_points', points_topic),
+                            ('/gpsimu_driver/imu_data', imu_topic),
+                            ('/odom', '/hdl_localization/odom')],
                 parameters=[
                     {'odom_child_frame_id': odom_child_frame_id},
                     {'use_imu': use_imu},
@@ -103,13 +112,14 @@ def generate_launch_description():
     return LaunchDescription([
         launch_ros.actions.SetParameter(name='use_sim_time', value=False),
         tf2_ros_base_link_to_livox_frame,
-        container,
+        tf2_ros_base_link_to_gps,
         Node(
             package='hdl_global_localization',
             executable='hdl_global_localization_node',
             name='hdl_global_localization',
             output='screen',
         ),
+        container,
         # livox_rviz
 
 
