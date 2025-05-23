@@ -50,7 +50,7 @@ def generate_launch_description():
         package='tf2_ros',
         executable='static_transform_publisher',
         name='tf2_ros_base_link_to_gps',
-        arguments='0.0 0.0 0.84 0.0 0.0 0.0 1.0 base_link gps'.split(' '),
+        arguments='0.0 0.0 0.0 0.0 0.0 0.0 1.0 base_link gps'.split(' '),
     )
 
     livox_rviz = Node(
