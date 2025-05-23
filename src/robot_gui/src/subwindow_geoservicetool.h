@@ -25,7 +25,7 @@ public:
     ~SubWindow_GeoServiceTool();
 
 public slots:
-    void onNewFixReceived(int status, double conv, double lat, double lon, double alt);
+    void onNewFixReceived(int status, double conv, double conv_z, double lat, double lon, double alt);
 
 private slots:
     void on_pushButton_setDatum_clicked();

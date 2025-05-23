@@ -57,7 +57,7 @@ private:
 
 signals:
     void mapMapNameChanged(const QString& newMapName);
-    void newFixReceived(int status, double conv, double lat, double lon, double alt);
+    void newFixReceived(int status, double conv, double conv_z, double lat, double lon, double alt);
     void navsatStartupCompleted();
 
 private slots:
@@ -70,7 +70,7 @@ private slots:
     void onMakeMapClosed();
     void onMakeRouteClosed();
     void onGuideRobotClosed();
-    void onNewFixReceived(int status, double conv, double lat, double lon, double alt);
+    void onNewFixReceived(int status, double conv, double conv_z, double lat, double lon, double alt);
     // 定时调用，用于处理ROS2消息回调
     void spin_ros()
     {

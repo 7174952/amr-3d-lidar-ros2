@@ -192,11 +192,12 @@ void MainWindow::odomGpsCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
     gps_marker_pub->publish(marker_array);
 }
 
-void MainWindow::onNewFixReceived(int status, double conv,double lat, double lon, double alt)
+void MainWindow::onNewFixReceived(int status, double conv, double conv_z, double lat, double lon, double alt)
 {
-    QString text = QString("GPS status: %1\nconv: %2\nLat: %3\nLon: %4\nAlt: %5")
+    QString text = QString("GPS status: %1\nconv_x: %2\nconv_z: %3\nLat: %4\nLon: %5\nAlt: %6")
                    .arg(status,0)
-                   .arg(conv,0, 'f',6)
+                   .arg(conv, 0, 'f', 6)
+                   .arg(conv_z, 0, 'f', 6)
                    .arg(lat, 0, 'f', 6)
                    .arg(lon, 0, 'f', 6)
                    .arg(alt, 0, 'f', 2);
@@ -217,7 +218,7 @@ void MainWindow::gpsFiltered_Callback(const sensor_msgs::msg::NavSatFix::SharedP
 
 void MainWindow::gnssFix_Callback(const sensor_msgs::msg::NavSatFix::SharedPtr msg)
 {
-    emit newFixReceived(msg->status.status, msg->position_covariance[0], msg->latitude, msg->longitude, msg->altitude);
+    emit newFixReceived(msg->status.status, msg->position_covariance[0], msg->position_covariance[8], msg->latitude, msg->longitude, msg->altitude);
 }
 
 void MainWindow::cartStatus_CallBack(const om_cart::msg::Status& status)
@@ -437,14 +438,14 @@ void MainWindow::on_checkBox_GnssSensor_stateChanged(int arg1)
         {
             gnss_rtk_process.setArguments({
                 "-in",  "ntrip://" + ntripSite + ":" + ntripPort + "/" + ntripMountPoint,
-                "-out", "serial://ttyACM-gnss:38400:8:n:1"
+                "-out", "serial://ttyACM-gnss:115200:8:n:1"
             });
         }
         else
         {
             gnss_rtk_process.setArguments({
                 "-in",  "ntrip://user@gmail.com:" + ntripPassword + "@" + ntripSite + ":" + ntripPort + "/" + ntripMountPoint,
-                "-out", "serial://ttyACM-gnss:38400:8:n:1"
+                "-out", "serial://ttyACM-gnss:115200:8:n:1"
             });
         }
 

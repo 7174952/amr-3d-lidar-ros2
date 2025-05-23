@@ -19,7 +19,7 @@ SubWindow_GeoServiceTool::~SubWindow_GeoServiceTool()
     delete ui;
 }
 
-void SubWindow_GeoServiceTool::onNewFixReceived(int status, double conv, double lat, double lon, double alt)
+void SubWindow_GeoServiceTool::onNewFixReceived(int status, double conv, double conv_z, double lat, double lon, double alt)
 {
     gpsConvThreshold = Global_DataSet::instance().gnssNtrip()["ConvThreshold"].toDouble();
     if(status < 0)

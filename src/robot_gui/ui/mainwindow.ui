@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1241</width>
-    <height>885</height>
+    <height>928</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -26,7 +26,7 @@
       <x>-10</x>
       <y>0</y>
       <width>1251</width>
-      <height>791</height>
+      <height>851</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -198,7 +198,7 @@
        <x>10</x>
        <y>10</y>
        <width>231</width>
-       <height>201</height>
+       <height>131</height>
       </rect>
      </property>
      <layout class="QFormLayout" name="formLayout">
@@ -297,7 +297,7 @@
        <x>9</x>
        <y>9</y>
        <width>231</width>
-       <height>451</height>
+       <height>511</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
