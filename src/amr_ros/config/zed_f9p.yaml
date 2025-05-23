@@ -4,13 +4,13 @@ ublox_gps_node:
     debug: 1
     device: /dev/ttyACM-gnss
     frame_id: gps
-    rate: 1.0
+    rate: 10.0
     config_on_startup: true        # 启用自动配置
     nav_rate: 1
 
     # 串口参数（用于接收差分和输出UBX）
     uart1:
-      baudrate: 38400
+      baudrate: 115200 #230400 #38400
       in: 4       # RTCM3 input
       out: 1      # UBX output
 
