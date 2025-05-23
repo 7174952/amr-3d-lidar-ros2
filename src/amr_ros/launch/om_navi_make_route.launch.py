@@ -124,5 +124,5 @@ def generate_launch_description():
         hdl_localization_launch,
         navsat_trans_node,
         odom_select_node,
-        # livox_driver2_launch,
+        livox_driver2_launch,
     ])

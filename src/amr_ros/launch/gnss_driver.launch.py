@@ -34,7 +34,7 @@ def generate_launch_description():
                 )
 
     return LaunchDescription([
-        DeclareLaunchArgument("gps_altitude_offset", default_value="0.8"),
-        # ublox_gps_node,
-        # gps_corrector_node
+        DeclareLaunchArgument("gps_altitude_offset", default_value="0.84"),
+        ublox_gps_node,
+        gps_corrector_node
     ])

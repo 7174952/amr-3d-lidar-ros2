@@ -163,6 +163,6 @@ def generate_launch_description():
             odom_select_node,
             static_tf,
             rviz_node,
-            # lidar_livox_launch
+            lidar_livox_launch
         ]
     )
