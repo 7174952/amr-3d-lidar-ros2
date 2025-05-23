@@ -9,7 +9,7 @@ class TextToSpeech:
         self.openai = OpenAI(api_key=config.API_KEY)
 
     def tts_with_openai(self, text, lang_code="ja"):
-        voice = {"zh": "alloy", "en": "onyx", "ja": "echo"}.get(lang_code, "alloy")
+        voice = {"zh": "nova", "en": "nova", "ja": "nova"}.get(lang_code, "nova")
         with self.openai.audio.speech.with_streaming_response.create(
             model="gpt-4o-mini-tts",
             voice=voice,

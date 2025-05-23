@@ -54,15 +54,15 @@ async def chatbot_logic(node: ChatBotNode):
             if node.req_wakeup:
                 continue #exit sleep(control mode)
 
-            if user_text.strip() == "" or user_text.strip() == "Thank you very much." or user_text.strip() == "Thank you." or lang not in ["en", "ja", "zh"]:
+            if user_text.strip() == ""  or lang not in ["en", "ja", "zh"]:
                 continue
-            elif any(word in user_text for word in ["走って", "はしって", "スタート", "前进","开始","出发","start", "START","Start"]):
+            elif any(word in user_text for word in ["走って", "はしって", "スタート", "前进","开始","出发","前進","開始","出発","start", "START","Start"]):
                 curr_state = "state:sleep;" + "start"
                 node.publish_text(curr_state)
                 play_silence()
                 play_ding(config.HOTWORD_RESP_PATH)
                 continue
-            elif any(word in user_text for word in ["止まって","とまって","泊まって","停まって", "留まって","待って","まって","待て","まて","ストップ","停车","stop","STOP","Stop"]):
+            elif any(word in user_text for word in ["止まって","とまって","泊まって","停まって", "留まって","待って","まって","待て","まて","ストップ","停车","停車","stop","STOP","Stop"]):
                 curr_state = "state:sleep;" + "stop"
                 node.publish_text(curr_state)
                 play_silence()
@@ -105,7 +105,7 @@ async def chatbot_logic(node: ChatBotNode):
                 node.publish_text(curr_state)
                 continue #goto sleep
 
-            if user_text.strip() == "" or lang not in ["en", "ja", "zh"]:
+            if user_text.strip() == "" or user_text.strip() == "Thank you very much." or user_text.strip() == "Thank you." or lang not in ["en", "ja", "zh"]:
                 curr_state = "state:ready;"
                 node.publish_text(curr_state)
                 continue

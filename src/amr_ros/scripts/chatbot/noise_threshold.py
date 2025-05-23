@@ -5,7 +5,7 @@ import time
 
 SAMPLE_RATE = 16000  # 采样率
 DURATION_BG = 5      # 背景噪声采样时间（秒）
-THRESHOLD_MULTIPLIER = 13000  # 阈值放大倍数 1.3倍
+THRESHOLD_MULTIPLIER = 1500  # 阈值放大倍数 1.5倍
 
 def get_rms(data):
     """计算均方根音量"""
@@ -18,6 +18,9 @@ def record_audio(duration, sample_rate):
     return audio
 
 print("📡 正在采样背景噪声 {} 秒...".format(DURATION_BG))
+# remove buffer data
+bg_data = record_audio(3, SAMPLE_RATE)
+
 bg_data = record_audio(DURATION_BG, SAMPLE_RATE)
 bg_rms = get_rms(bg_data)
 threshold = bg_rms * THRESHOLD_MULTIPLIER
