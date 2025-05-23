@@ -33,23 +33,17 @@ public:
             "/odometry/gps", 10,
             std::bind(&OdomSelector::gpsCallback, this, std::placeholders::_1));
 
-        sub_imu = this->create_subscription<sensor_msgs::msg::Imu>(
-            "/livox/imu", 10,
-            std::bind(&OdomSelector::imuCallback, this, std::placeholders::_1));
-
         // 发布
         pub_odom_ = this->create_publisher<nav_msgs::msg::Odometry>("/odom", 10);
 
         RCLCPP_INFO(this->get_logger(), "✅ Odom Selector started.");
 
-        imu_offset_total = 0;
     }
 
 private:
     // 订阅者和发布者
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr sub_hdl_;
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr sub_gps_;
-    rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr sub_imu;
 
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_odom_;
 
@@ -69,80 +63,16 @@ private:
     double avg_cov = 10000.0;
     double pre_avg_cov = 10000.0;
 
-    rclcpp::Time last_gps_time_;
-    geometry_msgs::msg::Point last_gps_pos_;
-    geometry_msgs::msg::Point prev_gps_pos_;
-    double integrated_yaw_ = 0.0;
-    rclcpp::Time last_imu_time_;
-    double imu_offset_z;
-    double imu_offset_total;
-    int imu_cnt = 0;
-    bool gps_ready_ = false;
+    int gps_good_cnt_ = 0;
+    const int gps_good_cnt_threshold_ = 50; // 例如10帧=1秒
 
     void hdlCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
     {
-        if(enable_gnss && (pre_avg_cov < gps_cov_threshold_))
+        if(enable_gnss && use_gps_)
             return;
 
         selected_msg = *msg;
         publishOdom();
-    }
-
-    void imuCallback(const sensor_msgs::msg::Imu::SharedPtr msg)
-    {
-        if(enable_gnss && (pre_avg_cov < gps_cov_threshold_))
-        {
-            if (!gps_ready_) return;
-
-            // 时间间隔
-            rclcpp::Time imu_time = msg->header.stamp;
-            if (last_imu_time_.nanoseconds() == 0)
-            {
-                last_imu_time_ = imu_time;
-                return;
-            }
-            double dt = (imu_time - last_imu_time_).seconds();
-            last_imu_time_ = imu_time;
-
-            // 积分yaw（假设只考虑 z 轴角速度）
-            integrated_yaw_ += (msg->angular_velocity.z - imu_offset_z) * dt;
-
-            // 插值位置
-            double gps_dt = (imu_time - last_gps_time_).seconds();
-            double total_gps_dt = (last_gps_time_ - rclcpp::Time(last_gps_msg_->header.stamp)).seconds();
-            if (total_gps_dt <= 0.0) return;
-
-            double ratio = std::min(std::max(gps_dt / total_gps_dt, 0.0), 1.0);
-            geometry_msgs::msg::Point interp_pos;
-            interp_pos.x = prev_gps_pos_.x + (last_gps_pos_.x - prev_gps_pos_.x) * ratio;
-            interp_pos.y = prev_gps_pos_.y + (last_gps_pos_.y - prev_gps_pos_.y) * ratio;
-            interp_pos.z = prev_gps_pos_.z + (last_gps_pos_.z - prev_gps_pos_.z) * ratio;
-
-            // 生成并发布 Odometry
-            nav_msgs::msg::Odometry odom_msg;
-            odom_msg.header.stamp = imu_time;
-            odom_msg.header.frame_id = "odom";
-            odom_msg.child_frame_id = "base_link";
-            odom_msg.pose.pose.position = interp_pos;
-
-            tf2::Quaternion q;
-            q.setRPY(0, 0, integrated_yaw_);
-            q.normalize();
-            odom_msg.pose.pose.orientation = tf2::toMsg(q);
-
-            pub_odom_->publish(odom_msg);
-
-            // 可选: 发送 TF
-            geometry_msgs::msg::TransformStamped tf_msg;
-            tf_msg.header = odom_msg.header;
-            tf_msg.child_frame_id = base_frame_;
-            tf_msg.transform.translation.x = interp_pos.x;
-            tf_msg.transform.translation.y = interp_pos.y;
-            tf_msg.transform.translation.z = interp_pos.z;
-            tf_msg.transform.rotation = odom_msg.pose.pose.orientation;
-            tf_broadcaster_->sendTransform(tf_msg);
-        }
-
     }
 
     void gpsCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
@@ -151,12 +81,6 @@ private:
             prev_gps_msg_ = last_gps_msg_;
         last_gps_msg_ = msg;
         tryPublishGpsOdom();
-
-        last_gps_time_ = last_gps_msg_->header.stamp;
-        prev_gps_pos_ = last_gps_pos_;
-        last_gps_pos_ = last_gps_msg_->pose.pose.position;
-        // integrated_yaw_ = 0.0;
-        gps_ready_ = true;
     }
 
     void tryPublishGpsOdom()
@@ -164,16 +88,26 @@ private:
         static double last_yaw = 0.0;
 
         // 计算GPS协方差
-        avg_cov = last_gps_msg_->pose.covariance[0];
+        avg_cov = std::max(last_gps_msg_->pose.covariance[0], last_gps_msg_->pose.covariance[8]);
 
-        // 判断是否切换来源
+        // 判断是否满足连续若干帧都满足阈值
         if (avg_cov < gps_cov_threshold_)
         {
-            use_gps_ = true;
+            gps_good_cnt_++;
+            if (!use_gps_ && (gps_good_cnt_ >= gps_good_cnt_threshold_))
+            {
+                use_gps_ = true;
+                RCLCPP_INFO(this->get_logger(), "切换到GPS里程计！");
+            }
         }
-        else if (avg_cov > gps_cov_threshold_ * 2.0)
+        else
         {
-            use_gps_ = false;
+            gps_good_cnt_ = 0;
+            if (use_gps_ && (avg_cov > gps_cov_threshold_ * 2.0))
+            {
+                use_gps_ = false;
+                RCLCPP_INFO(this->get_logger(), "GPS协方差过大，回退到激光里程计！");
+            }
         }
 
         // 使用当前策略
@@ -198,7 +132,6 @@ private:
             {
                 yaw = last_yaw;
             }
-            integrated_yaw_ = yaw;
 
             //static transform gps->base_link
             double x_raw = selected_msg.pose.pose.position.x;

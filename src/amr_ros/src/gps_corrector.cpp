@@ -8,7 +8,7 @@ public:
     : Node("gps_corrector_node")
     {
         // 声明参数
-        this->declare_parameter<double>("gps_altitude_offset", 0.8);
+        this->declare_parameter<double>("gps_altitude_offset", 0.84);
         this->get_parameter("gps_altitude_offset", gps_altitude_offset_);
 
         RCLCPP_INFO(this->get_logger(), "🛰️ 海拔修正偏移量为: %.2f m", gps_altitude_offset_);
