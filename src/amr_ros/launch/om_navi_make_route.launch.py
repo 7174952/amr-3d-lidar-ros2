@@ -103,12 +103,12 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        DeclareLaunchArgument('enable_gnss',default_value='true'),
+        DeclareLaunchArgument('enable_gnss',default_value='false'),
         DeclareLaunchArgument('latitude', default_value='35.0'),
         DeclareLaunchArgument('longitude', default_value='135.0'),
         DeclareLaunchArgument('altitude', default_value='0.0'),
         DeclareLaunchArgument("yaw_offset", default_value="0.0"),
-        DeclareLaunchArgument('globalmap_path', default_value='/home/mikuni/ros2_ws/src/amr_ros/maps/demoRD/GlobalMap.pcd', description='Name of the robot'),
+        DeclareLaunchArgument('globalmap_path', default_value='/home/mikuni/ros2_ws/src/amr_ros/maps/testCT/GlobalMap.pcd', description='Name of the robot'),
         DeclareLaunchArgument('init_px', default_value='0.0', description='init pos x'),
         DeclareLaunchArgument('init_py', default_value='0.0', description='init pos y'),
         DeclareLaunchArgument('init_pz', default_value='0.0', description='init pos z'),
