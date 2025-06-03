@@ -11,7 +11,7 @@ SAMPLE_RATE = 16000
 MODEL_PATH = "keywords/porcupine_params_ja.pv"
 WAKEUP_ACCESS_KEY = os.getenv("WAKEUP_ACCESS_KEY")
 WHISPER_MODEL = "base"
-DEVICE = "cuda"
+DEVICE = "cpu"
 COMPUTE_TYPE = "int8"
 
 TEXT_FILE_PATH = {
