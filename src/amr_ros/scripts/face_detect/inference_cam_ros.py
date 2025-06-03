@@ -19,6 +19,10 @@ from face_alignment import align
 
 LOGGER = logging.getLogger(__name__)
 
+# 1. 选择device
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"🔥 Using device: {device}")
+
 # 数据集类：加载目标注册图片
 class ImageDataset(Dataset):
     def __init__(self, root_dir, target_label):
@@ -36,13 +40,13 @@ class ImageDataset(Dataset):
     def __getitem__(self, idx):
         return self.image_paths[idx]
 
-# 加载预训练模型
-def load_pretrained_model(architecture='ir_50'):
+# 加载预训练模型，并迁移到device
+def load_pretrained_model(architecture='ir_50', device=device):
     adaface_models = {
         'ir_50': "pretrained/adaface_ir50_ms1mv2.ckpt",
     }
     assert architecture in adaface_models.keys()
-    model = net.build_model(architecture)
+    model = net.build_model(architecture).to(device)
     statedict = torch.load(adaface_models[architecture], weights_only=False)['state_dict']
     # 去除 "model." 前缀
     model_statedict = {key[6:]: val for key, val in statedict.items() if key.startswith('model.')}
@@ -50,18 +54,19 @@ def load_pretrained_model(architecture='ir_50'):
     model.eval()
     return model
 
-# 将 PIL 图像转换为模型输入张量
-def to_input(pil_rgb_image):
+# 将 PIL 图像转换为模型输入张量，并迁移到device
+def to_input(pil_rgb_image, device=device):
     np_img = np.array(pil_rgb_image)
     bgr_img = ((np_img[:, :, ::-1] / 255.) - 0.5) / 0.5
-    tensor = torch.tensor(np.array(bgr_img.transpose(2, 0, 1))).unsqueeze(0).float()
+    tensor = torch.tensor(np.array(bgr_img.transpose(2, 0, 1))).unsqueeze(0).float().to(device)
     return tensor
 
 # 提取人脸特征
-def embedding_face_features(model, aligned_img):
-    bgr_tensor_input = to_input(aligned_img)
-    embedding, _ = model(bgr_tensor_input)
-    return embedding
+def embedding_face_features(model, aligned_img, device=device):
+    bgr_tensor_input = to_input(aligned_img, device)
+    with torch.no_grad():
+        embedding, _ = model(bgr_tensor_input)
+    return embedding.cpu()  # 后续统一转到cpu，方便与库比对和numpy互操作
 
 # 绘制边框并标注（可附带距离信息）
 def draw_bbox(img, bbox, class_name, distance=None):
@@ -103,7 +108,7 @@ class FaceRecognitionNode(Node):
         self.face_info_pub = self.create_publisher(String, self.face_info_topic, 10)
 
         self.get_logger().info("Loading pretrained model...")
-        self.model = load_pretrained_model('ir_50')
+        self.model = load_pretrained_model('ir_50', device)
 
         # 加载目标图片并提取人脸特征
         self.training_features = {}
@@ -117,7 +122,7 @@ class FaceRecognitionNode(Node):
                 for img_path in img_paths:
                     aligned_rgb_imgs, _ = align.get_aligned_face(img_path)
                     for aligned_img in aligned_rgb_imgs:
-                        embedding = embedding_face_features(self.model, aligned_img)
+                        embedding = embedding_face_features(self.model, aligned_img, device)
                         self.training_features[class_name].append(embedding)
             self.get_logger().info(f"[{class_name}]: Registered {len(self.training_features[class_name])} faces")
 
@@ -143,7 +148,6 @@ class FaceRecognitionNode(Node):
         color_image = np.asanyarray(color_frame.get_data())
         cv_rgb = cv2.cvtColor(color_image, cv2.COLOR_BGR2RGB)
         pil_image = PILImage.fromarray(cv_rgb)
-        # 注意：检测时传入 None 表示直接使用 PIL 图像
         aligned_rgb_imgs, bboxes = align.get_aligned_face(None, pil_image)
 
         num_recognized = 0
@@ -151,7 +155,7 @@ class FaceRecognitionNode(Node):
         if len(aligned_rgb_imgs) > 0:
             cam_features = []
             for aligned_img in aligned_rgb_imgs:
-                embedding = embedding_face_features(self.model, aligned_img)
+                embedding = embedding_face_features(self.model, aligned_img, device)
                 cam_features.append(embedding)
             num_face = len(cam_features)
             similarity_scores = {}
@@ -160,9 +164,9 @@ class FaceRecognitionNode(Node):
                 if num_face == 0:
                     similarity_scores[class_name] = np.zeros((num_training, 1))
                 else:
-                    training_features_matrix = torch.cat(self.training_features[class_name])
-                    cam_features_matrix = torch.cat(cam_features)
-                    similarity_scores[class_name] = torch.mm(training_features_matrix, cam_features_matrix.T).detach().numpy()
+                    training_features_matrix = torch.cat(self.training_features[class_name])  # cpu张量
+                    cam_features_matrix = torch.cat(cam_features)  # cpu张量
+                    similarity_scores[class_name] = torch.mm(training_features_matrix, cam_features_matrix.T).detach().cpu().numpy()
 
             face_info_str = f"total:{num_face};"
             for i in range(num_face):
@@ -185,7 +189,6 @@ class FaceRecognitionNode(Node):
                     for ny in range(-4,4,1):
                         dist_total += depth_frame.get_distance(center_x + int(nx*(w/100)), center_y + int(ny*(h/100)))
                         cnt +=1
-                # distance = depth_frame.get_distance(center_x, center_y)
                 if cnt > 0:
                     distance = dist_total/cnt;
                 else:
