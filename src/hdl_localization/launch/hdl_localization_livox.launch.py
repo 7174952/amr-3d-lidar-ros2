@@ -91,8 +91,8 @@ def generate_launch_description():
                     {'enable_robot_odometry_prediction': enable_robot_odometry_prediction},
                     {'robot_odom_frame_id': robot_odom_frame_id},
                     # <!-- available reg_methods: NDT_OMP, NDT_CUDA_P2D, NDT_CUDA_D2D-->
-                    {'reg_method': 'NDT_OMP'},
-                    {'ndt_neighbor_search_method': 'DIRECT7'},
+                    {'reg_method': 'NDT_CUDA_P2D'},
+                    {'ndt_neighbor_search_method': 'DIRECT1'},
                     {'ndt_neighbor_search_radius': 2.0},
                     {'ndt_resolution': 1.0},
                     {'downsample_resolution': 0.1},
