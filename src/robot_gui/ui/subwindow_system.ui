@@ -39,7 +39,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>2</number>
    </property>
    <widget class="QWidget" name="tab_Path">
     <attribute name="title">
@@ -409,6 +409,11 @@
            <string>2101</string>
           </property>
          </item>
+         <item>
+          <property name="text">
+           <string>2104</string>
+          </property>
+         </item>
         </widget>
        </item>
        <item row="2" column="0">
@@ -452,7 +457,17 @@
          </item>
          <item>
           <property name="text">
+           <string>981E8A9A - 岩手県滝沢市ロボティクス(ntrip1)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
            <string>mikuni_odawara - 小田原ミクニ(rtk2go)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>mic-taki - 滝沢工場(rtk2go)</string>
           </property>
          </item>
         </widget>
