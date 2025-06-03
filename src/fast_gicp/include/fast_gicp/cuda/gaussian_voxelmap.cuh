@@ -17,7 +17,7 @@ struct VoxelMapInfo {
 
 class GaussianVoxelMap {
 public:
-  GaussianVoxelMap(float resolution, int init_num_buckets = 8192, int max_bucket_scan_count = 10);
+  GaussianVoxelMap(float resolution, int init_num_buckets = 131072, int max_bucket_scan_count = 10);
 
   void create_voxelmap(const thrust::device_vector<Eigen::Vector3f>& points);
   void create_voxelmap(const thrust::device_vector<Eigen::Vector3f>& points, const thrust::device_vector<Eigen::Matrix3f>& covariances);
