@@ -7,6 +7,7 @@ option(BUILD_test "Build test programs" OFF)
 option(BUILD_PYTHON_BINDINGS "Build python bindings" OFF)
 
 set(CMAKE_BUILD_TYPE "Release")
+set(CMAKE_CUDA_ARCHITECTURES 89)
 
 find_package(PCL REQUIRED)
 find_package(Eigen3 REQUIRED)
@@ -91,7 +92,7 @@ endif()
 
 ### Python bindings ###
 if(BUILD_PYTHON_BINDINGS)
-  add_subdirectory(thirdparty/pybind11)
+  find_package(pybind11 CONFIG)
   pybind11_add_module(pygicp
     src/python/main.cpp
   )
@@ -102,6 +103,10 @@ if(BUILD_PYTHON_BINDINGS)
   )
   target_link_libraries(pygicp PRIVATE
     fast_gicp
+  )
+  set_target_properties(pygicp PROPERTIES
+    INSTALL_RPATH "$ORIGIN/"
+    BUILD_WITH_INSTALL_RPATH TRUE
   )
 endif()
 
