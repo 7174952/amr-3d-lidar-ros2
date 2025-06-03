@@ -1,0 +1,560 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SubWindow_System</class>
+ <widget class="QDialog" name="SubWindow_System">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>834</width>
+    <height>524</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>System Setup</string>
+  </property>
+  <widget class="QDialogButtonBox" name="buttonBox">
+   <property name="geometry">
+    <rect>
+     <x>640</x>
+     <y>470</y>
+     <width>181</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+   </property>
+  </widget>
+  <widget class="QTabWidget" name="tabWidget">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>811</width>
+     <height>441</height>
+    </rect>
+   </property>
+   <property name="currentIndex">
+    <number>2</number>
+   </property>
+   <widget class="QWidget" name="tab_Path">
+    <attribute name="title">
+     <string>Path</string>
+    </attribute>
+    <widget class="QWidget" name="formLayoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>781</width>
+       <height>391</height>
+      </rect>
+     </property>
+     <layout class="QFormLayout" name="formLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_ProjectPath">
+        <property name="text">
+         <string>Project Folder</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QLineEdit" name="lineEdit_ProjectPath"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_ProjectPath">
+          <property name="text">
+           <string>Select</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_InstallPath">
+        <property name="text">
+         <string>Install Folder</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLineEdit" name="lineEdit_InstallPath"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_InstallPath">
+          <property name="text">
+           <string>Select</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_MapPath">
+        <property name="text">
+         <string>Map Folder</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QLineEdit" name="lineEdit_MapPath"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_MapPath">
+          <property name="text">
+           <string>Select</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_PointCloudPath">
+        <property name="text">
+         <string>PointCloud Path </string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QLineEdit" name="lineEdit_PointCloudPath"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_PointCloudPath">
+          <property name="text">
+           <string>Select</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="label_BagDataPath">
+        <property name="text">
+         <string>Bag Data Folder</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="QLineEdit" name="lineEdit_BagDataPath"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_BagDataPath">
+          <property name="text">
+           <string>Select</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="label_ScriptPath">
+        <property name="text">
+         <string>Script Folder</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <item>
+         <widget class="QLineEdit" name="lineEdit_ScriptPath"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_ScriptPath">
+          <property name="text">
+           <string>Select</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="label_LaunchFoler">
+        <property name="text">
+         <string>Launch Folder</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <item>
+         <widget class="QLineEdit" name="lineEdit_LaunchPath"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_LaunchPath">
+          <property name="text">
+           <string>Select</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="label_ResourcePath">
+        <property name="text">
+         <string>Resource Folder</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_8">
+        <item>
+         <widget class="QLineEdit" name="lineEdit_ResourcePath"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_ResourcePath">
+          <property name="text">
+           <string>Select</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="label_PythonPathCamera">
+        <property name="text">
+         <string>Virtual Python Path for Camera</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_9">
+        <item>
+         <widget class="QLineEdit" name="lineEdit_PythonPathCamera"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_PythonPathCamera">
+          <property name="text">
+           <string>Select</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="9" column="0">
+       <widget class="QLabel" name="label_PythonPathVoice">
+        <property name="text">
+         <string>Virtual Python Path for Voice</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_10">
+        <item>
+         <widget class="QLineEdit" name="lineEdit_PythonPathVoice"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_PythonPathVoice">
+          <property name="text">
+           <string>Select</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tab_robotSize">
+    <attribute name="title">
+     <string>Robot Size</string>
+    </attribute>
+    <widget class="QWidget" name="formLayoutWidget_2">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>30</y>
+       <width>331</width>
+       <height>271</height>
+      </rect>
+     </property>
+     <layout class="QFormLayout" name="formLayout_2">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_obstRangeMin">
+        <property name="text">
+         <string>Obstacle Range Min (m)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="lineEdit_obstRangeMin"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_obstRangeMax">
+        <property name="text">
+         <string>Obstacle Range Max (m)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="lineEdit_obstRangeMax"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_robotWidth">
+        <property name="text">
+         <string>Robot Width (m)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="lineEdit_robotWidth"/>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_robotHeight">
+        <property name="text">
+         <string>Robot Height (m)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="lineEdit_robotHeight"/>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="label_WidthTolarance">
+        <property name="text">
+         <string>Robot Width Tolerance (m)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="lineEdit_obstTolerance"/>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="label_distanceLidarToGnss">
+        <property name="text">
+         <string>Distance(m): Lidar-&gt;gnss</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QLineEdit" name="lineEdit_distanceLidarToGnss"/>
+      </item>
+     </layout>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tab_GnssNtrip">
+    <attribute name="title">
+     <string>Gnss RTK</string>
+    </attribute>
+    <widget class="QGroupBox" name="groupBox_ntrip">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>30</y>
+       <width>351</width>
+       <height>251</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Ntrip </string>
+     </property>
+     <widget class="QWidget" name="layoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>331</width>
+        <height>201</height>
+       </rect>
+      </property>
+      <layout class="QFormLayout" name="formLayout_3">
+       <item row="0" column="1">
+        <widget class="QComboBox" name="comboBox_ntripSite">
+         <property name="editable">
+          <bool>false</bool>
+         </property>
+         <item>
+          <property name="text">
+           <string>ntrip1.bizstation.jp</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>rtk2go.com</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_ntripSite">
+         <property name="text">
+          <string>Ntrip Site</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_accessPort">
+         <property name="text">
+          <string>Port</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QComboBox" name="comboBox_accessPort">
+         <item>
+          <property name="text">
+           <string>2101</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>2104</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_mountPoint">
+         <property name="text">
+          <string>Mount Point</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_password">
+         <property name="text">
+          <string>Password</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="lineEdit_password"/>
+       </item>
+       <item row="2" column="1">
+        <widget class="QComboBox" name="comboBox_mountPoint">
+         <item>
+          <property name="text">
+           <string>B49FE98A - 静岡県沼津市(ntrip1)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>B4A00B46 - 横浜市西区(ntrip1)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>981FD39A - 山梨県富士河口湖町(ntrip1)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>B49FE586 - 山梨県南巨摩郡(ntrip1)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>981E8A9A - 岩手県滝沢市ロボティクス(ntrip1)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>mikuni_odawara - 小田原ミクニ(rtk2go)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>mic-taki - 滝沢工場(rtk2go)</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_rtkClient">
+     <property name="geometry">
+      <rect>
+       <x>400</x>
+       <y>30</y>
+       <width>361</width>
+       <height>251</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>RTK Client</string>
+     </property>
+     <widget class="QWidget" name="formLayoutWidget_3">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>341</width>
+        <height>201</height>
+       </rect>
+      </property>
+      <layout class="QFormLayout" name="formLayout_4">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_conv_threshold">
+         <property name="text">
+          <string>Conv Threshold</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="lineEdit_convThreshold">
+         <property name="text">
+          <string>0.05</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tab_Lang">
+    <attribute name="title">
+     <string>Language</string>
+    </attribute>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>SubWindow_System</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>SubWindow_System</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

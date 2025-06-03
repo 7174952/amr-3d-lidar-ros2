@@ -430,7 +430,17 @@ void MainWindow::on_checkBox_GnssSensor_stateChanged(int arg1)
     {
         QString ntripSite = Global_DataSet::instance().gnssNtrip()["NtripSite"];
         QString ntripPort = Global_DataSet::instance().gnssNtrip()["NtripPort"];
-        QString ntripMountPoint = Global_DataSet::instance().gnssNtrip()["NtripMountPoint"].split("-").at(0);
+        QString ntripMountPoint;
+
+        if(Global_DataSet::instance().gnssNtrip()["NtripMountPoint"].contains("mic-taki"))
+        {
+            ntripMountPoint = "mic-taki";
+        }
+        else
+        {
+            ntripMountPoint = Global_DataSet::instance().gnssNtrip()["NtripMountPoint"].split("-").at(0);
+        }
+
         QString ntripPassword = Global_DataSet::instance().gnssNtrip()["NtripPassword"];
 
         gnss_rtk_process.setProgram("str2str");
