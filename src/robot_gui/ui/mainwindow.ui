@@ -103,9 +103,14 @@
      <string>&amp;Tools</string>
     </property>
     <addaction name="action_Debug_Enable"/>
+    <addaction name="separator"/>
     <addaction name="actionGeo_Service"/>
+    <addaction name="separator"/>
     <addaction name="actionNoise_Threshold"/>
+    <addaction name="separator"/>
     <addaction name="actionUser_Face_Register"/>
+    <addaction name="separator"/>
+    <addaction name="actionSetup_Init_Locations"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
@@ -151,7 +156,6 @@
    <addaction name="actionSet_Motor_Brake"/>
    <addaction name="separator"/>
    <addaction name="actionGeo_Service"/>
-   <addaction name="actionInit_Pose"/>
    <addaction name="separator"/>
    <addaction name="actionUser_Face_Register"/>
   </widget>
@@ -577,6 +581,11 @@
   <action name="actionUser_Face_Register">
    <property name="text">
     <string>User Face Login</string>
+   </property>
+  </action>
+  <action name="actionSetup_Init_Locations">
+   <property name="text">
+    <string>Setup Init Locations</string>
    </property>
   </action>
  </widget>

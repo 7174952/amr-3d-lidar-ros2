@@ -354,7 +354,7 @@
       <rect>
        <x>30</x>
        <y>30</y>
-       <width>351</width>
+       <width>411</width>
        <height>251</height>
       </rect>
      </property>
@@ -366,7 +366,7 @@
        <rect>
         <x>10</x>
         <y>30</y>
-        <width>331</width>
+        <width>381</width>
         <height>201</height>
        </rect>
       </property>
@@ -478,9 +478,9 @@
     <widget class="QGroupBox" name="groupBox_rtkClient">
      <property name="geometry">
       <rect>
-       <x>400</x>
+       <x>460</x>
        <y>30</y>
-       <width>361</width>
+       <width>301</width>
        <height>251</height>
       </rect>
      </property>
@@ -490,9 +490,9 @@
      <widget class="QWidget" name="formLayoutWidget_3">
       <property name="geometry">
        <rect>
-        <x>10</x>
+        <x>30</x>
         <y>30</y>
-        <width>341</width>
+        <width>241</width>
         <height>201</height>
        </rect>
       </property>

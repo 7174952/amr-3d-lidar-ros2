@@ -42,39 +42,7 @@ protected:
         QDialog::closeEvent(event);
     }
 
-signals:
-    void subWindowClosed();
-
-public slots:
-    void updateMapName(const QString& newMapName);
-    void onNavsatStartupCompleted();
-
-private slots:
-    void on_pushButton_StartRoute_toggled(bool checked);
-
-    void on_pushButton_recordRoute_toggled(bool checked);
-
-    void on_pushButton_exchLocation_clicked();
-
-    void Odometry_CallBack(const nav_msgs::msg::Odometry& odom);
-
-    void on_pushButton_withRule_toggled(bool checked);
-
 private:
-    void upload_routeList();
-
-private:
-    rclcpp::Node::SharedPtr node_;
-    QProcess* ros_make_route_process;
-    QProcess* ros_manual_process;
-
-    QString m_mapName;
-    rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr sub_odom;
-
-    QVector<double> last_point;
-    rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_pub;
-    int idx_;
-
     //define waypoints list
     struct Robot_Pose
     {
@@ -127,6 +95,44 @@ private:
     Rule rule;
     QList<Rule> rules_list;
 
+
+signals:
+    void subWindowClosed();
+    void odomReceived(QVector<double> odom_pose);
+
+public slots:
+    void updateMapName(const QString& newMapName);
+    void onNavsatStartupCompleted();
+
+private slots:
+    void on_pushButton_StartRoute_toggled(bool checked);
+
+    void on_pushButton_recordRoute_toggled(bool checked);
+
+    void on_pushButton_exchLocation_clicked();
+
+    void Odometry_CallBack(const nav_msgs::msg::Odometry& odom);
+
+    void on_pushButton_withRule_toggled(bool checked);
+
+    void on_comboBox_initLocation_currentTextChanged(const QString &arg1);
+
+private:
+    void upload_routeList();
+
+private:
+    rclcpp::Node::SharedPtr node_;
+    QProcess* ros_make_route_process;
+    QProcess* ros_manual_process;
+
+    QString m_mapName;
+    rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr sub_odom;
+
+    QVector<double> last_point;
+    rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr marker_pub;
+    int idx_;
+
+    QMap<QString, Robot_Pose> init_location_list;
 
 private:
     Ui::SubWindow_MakeRoute *ui;

@@ -44,6 +44,7 @@ set(UI_FILES
   ui/subwindow_guiderobot.ui
   ui/subwindow_geoservicetool.ui
   ui/subwindow_facelogin.ui
+  ui/setup_init_location.ui
 
 )
 
@@ -71,6 +72,7 @@ add_executable(${PROJECT_NAME}_node
     src/audiomanager.cpp
     src/subwindow_geoservicetool.cpp
     src/subwindow_facelogin.cpp
+    src/setup_init_location.cpp
     ${UI_HEADERS})
 ament_target_dependencies(${PROJECT_NAME}_node rclcpp std_msgs geographic_msgs robot_localization
                             sensor_msgs geometry_msgs nav_msgs std_srvs tf2_ros tf2_eigen visualization_msgs om_cart)

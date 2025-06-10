@@ -161,11 +161,11 @@ void SubWindow_GuideRobot::onSearchCurrLocation()
     {
         double dist_start = std::sqrt(  std::pow(location_list[navi_start].x - robot_cur_pose.pos_x, 2)
                               + std::pow(location_list[navi_start].y- robot_cur_pose.pos_y, 2)
-                              + std::pow(location_list[navi_start].z - robot_cur_pose.pos_z, 2));
+                              /*+ std::pow(location_list[navi_start].z - robot_cur_pose.pos_z, 2)*/);
 
         double dist_target = std::sqrt(  std::pow(location_list[navi_target].x - robot_cur_pose.pos_x, 2)
                               + std::pow(location_list[navi_target].y- robot_cur_pose.pos_y, 2)
-                              + std::pow(location_list[navi_target].z - robot_cur_pose.pos_z, 2));
+                              /*+ std::pow(location_list[navi_target].z - robot_cur_pose.pos_z, 2)*/);
         if(dist_start < 1.0)
         {
             current_location = navi_start;
@@ -188,7 +188,7 @@ void SubWindow_GuideRobot::onSearchCurrLocation()
         {
             double dist = std::sqrt(  std::pow(it.value().x - robot_cur_pose.pos_x, 2)
                                     + std::pow(it.value().y- robot_cur_pose.pos_y, 2)
-                                    + std::pow(it.value().z - robot_cur_pose.pos_z, 2));
+                                    /*+ std::pow(it.value().z - robot_cur_pose.pos_z, 2)*/);
             if(dist < 1.0)
             {
                 current_location = it.key();
@@ -204,7 +204,7 @@ void SubWindow_GuideRobot::onSearchCurrLocation()
     ui->lineEdit_currentLocation->setText(current_location);
 
     //show targets
-    if(init_location || (last_location != current_location) &&  location_list.contains(current_location))
+    if(init_location || ((last_location != current_location) &&  location_list.contains(current_location)))
     {
         if(init_location)
         {
@@ -545,6 +545,33 @@ void SubWindow_GuideRobot::updateMapName(const QString& newMapName)
 
     upload_LocationList();
     upload_RouteList();
+
+    //get Init Location List from file
+    init_location_list["origin"] = {0.0,0.0,0.0,0.0,0.0,0.0,1.0};
+    ui->comboBox_initLocation->addItem("origin");
+    QString path = Global_DataSet::instance().sysPath()["MapPath"] + "/" + m_mapName + "/init_location_list.txt";
+    QFile file(path);
+    if(file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QTextStream in(&file);
+
+        while (!in.atEnd())
+        {
+            QStringList line = in.readLine().trimmed().split(":");
+            QStringList strVal = line.at(1).split(",");
+
+            init_location_list[line.at(0)].pos_x = strVal.at(0).toDouble();
+            init_location_list[line.at(0)].pos_y = strVal.at(1).toDouble();
+            init_location_list[line.at(0)].pos_z = strVal.at(2).toDouble();
+            init_location_list[line.at(0)].ori_x = strVal.at(3).toDouble();
+            init_location_list[line.at(0)].ori_y = strVal.at(4).toDouble();
+            init_location_list[line.at(0)].ori_z = strVal.at(5).toDouble();
+            init_location_list[line.at(0)].ori_w = strVal.at(6).toDouble();
+            ui->comboBox_initLocation->addItem(line.at(0));
+        }
+        file.close();
+    }
+
 }
 
 void SubWindow_GuideRobot::upload_LocationList()
@@ -849,6 +876,13 @@ void SubWindow_GuideRobot::on_comboBox_userLanguage_currentTextChanged(const QSt
 {
     audioManager->setObstacleAudio(system_path["ResourcePath"] + "/obstacle_alert_" + user_language[arg1] + ".mp3");
     audioManager->setGuideAudio(system_path["ResourcePath"] + "/guide_follow_up_" + user_language[arg1] + ".mp3");
+
+}
+
+
+void SubWindow_GuideRobot::on_comboBox_initLocation_currentTextChanged(const QString &arg1)
+{
+    init_pose = init_location_list[arg1];
 
 }
 

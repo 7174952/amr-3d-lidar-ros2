@@ -170,6 +170,8 @@ private slots:
 
     void on_comboBox_userLanguage_currentTextChanged(const QString &arg1);
 
+    void on_comboBox_initLocation_currentTextChanged(const QString &arg1);
+
 private:
     void Odometry_CallBack(const nav_msgs::msg::Odometry& odom);
     void reachedGoal_CallBack(const std_msgs::msg::Bool& msg);
@@ -219,6 +221,8 @@ private:
     };
     Robot_Pose robot_cur_pose;
     Robot_Pose init_pose;
+
+    QMap<QString, Robot_Pose>init_location_list;
 
     //define route
     struct Rule

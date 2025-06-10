@@ -25,6 +25,7 @@
 #include "subwindow_guiderobot.h"
 #include "subwindow_geoservicetool.h"
 #include "subwindow_facelogin.h"
+#include "setup_init_location.h"
 
 #include "utils.h"
 #include "global_dataset.h"
@@ -95,8 +96,6 @@ private slots:
 
   void on_comboBox_MapFolder_currentTextChanged(const QString &arg1);
 
-  void on_actionInit_Pose_triggered();
-
   void on_action_Guide_Robot_triggered();
 
   void on_action_Debug_Enable_triggered(bool checked);
@@ -110,6 +109,8 @@ private slots:
   void on_actionUser_Face_Register_triggered();
 
   void on_checkBox_GuideCamera_stateChanged(int arg1);
+
+  void on_actionSetup_Init_Locations_triggered();
 
 private:
   void cartStatus_CallBack(const om_cart::msg::Status& status);
@@ -178,6 +179,8 @@ private:
 
 private:
   Ui::MainWindow *ui;
+
+  SubWindow_MakeRoute *subwin_makeRoute;
 
   QProcess* robot_driver_process;
   QProcess gnss_driver_process;

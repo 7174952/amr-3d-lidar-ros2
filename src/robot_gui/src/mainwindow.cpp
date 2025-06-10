@@ -347,10 +347,10 @@ void MainWindow::on_action_Make_Map_triggered()
 
 void MainWindow::on_action_Make_Route_triggered()
 {
-    SubWindow_MakeRoute *subwin_makeRoute = new SubWindow_MakeRoute(node_);
+    subwin_makeRoute = new SubWindow_MakeRoute(node_);
     QMdiSubWindow *submdiwin_makeRoute = ui->mdiArea->addSubWindow(subwin_makeRoute);
-    submdiwin_makeRoute->setMinimumSize(1200,800);
-    submdiwin_makeRoute->setMaximumSize(1200,800);
+    submdiwin_makeRoute->setMinimumSize(1200,810);
+    submdiwin_makeRoute->setMaximumSize(1200,810);
     submdiwin_makeRoute->setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
     // 连接自定义信号到主窗口的槽（例如 onDialogClosed）
     connect(subwin_makeRoute, &SubWindow_MakeRoute::subWindowClosed, this, &MainWindow::onMakeRouteClosed);
@@ -370,11 +370,6 @@ void MainWindow::on_action_Make_Route_triggered()
 void MainWindow::on_comboBox_MapFolder_currentTextChanged(const QString &arg1)
 {
     emit mapMapNameChanged(arg1);
-}
-
-void MainWindow::on_actionInit_Pose_triggered()
-{
-    //call init_robot_pose.py
 }
 
 void MainWindow::on_action_Guide_Robot_triggered()
@@ -534,5 +529,23 @@ void MainWindow::on_checkBox_GuideCamera_stateChanged(int arg1)
 {
     bool state = (arg1 == 2) ? true : false;
     Global_DataSet::instance().setSensorEnable("GuideCameraEn",state);
+}
+
+
+void MainWindow::on_actionSetup_Init_Locations_triggered()
+{
+    Setup_Init_Location *subwin_setupInitLocation = new Setup_Init_Location();
+    QMdiSubWindow *mdiwin_setupInitLocation = ui->mdiArea->addSubWindow(subwin_setupInitLocation);
+    mdiwin_setupInitLocation->setMinimumSize(420,350);
+    mdiwin_setupInitLocation->setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+    // show gnss ntrip status
+
+    connect(subwin_makeRoute, &SubWindow_MakeRoute::odomReceived,
+            subwin_setupInitLocation,  &Setup_Init_Location::onOdomReceived);
+    connect(this, &MainWindow::mapMapNameChanged, subwin_setupInitLocation, &Setup_Init_Location::updateMapName);
+    emit mapMapNameChanged(ui->comboBox_MapFolder->currentText());
+
+    mdiwin_setupInitLocation->show();
+
 }
 

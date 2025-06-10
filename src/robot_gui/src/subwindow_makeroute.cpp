@@ -104,6 +104,18 @@ void SubWindow_MakeRoute::Odometry_CallBack(const nav_msgs::msg::Odometry& odom)
         marker.color.b = 0.0;
         marker_pub->publish(marker);
     }
+
+    //send emit
+    QVector<double> odom_pose;
+    odom_pose.resize(7);
+    odom_pose[0] = robot_cur_pose.pos_x;
+    odom_pose[1] = robot_cur_pose.pos_y;
+    odom_pose[2] = robot_cur_pose.pos_z;
+    odom_pose[3] = robot_cur_pose.ori_x;
+    odom_pose[4] = robot_cur_pose.ori_y;
+    odom_pose[5] = robot_cur_pose.ori_z;
+    odom_pose[6] = robot_cur_pose.ori_w;
+    emit odomReceived(odom_pose);
 }
 
 void SubWindow_MakeRoute::upload_routeList()
@@ -150,6 +162,33 @@ void SubWindow_MakeRoute::updateMapName(const QString& newMapName)
 
     //show all route details
     upload_routeList();
+
+    //get Init Location List from file
+    init_location_list["origin"] = {0.0,0.0,0.0,0.0,0.0,0.0,1.0};
+
+    ui->comboBox_initLocation->addItem("origin");
+    QString filePath = Global_DataSet::instance().sysPath()["MapPath"] + "/" + m_mapName + "/init_location_list.txt";
+    QFile file(filePath);
+    if(file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QTextStream in(&file);
+
+        while (!in.atEnd())
+        {
+            QStringList line = in.readLine().trimmed().split(":");
+            QStringList strVal = line.at(1).split(",");
+
+            init_location_list[line.at(0)].pos_x = strVal.at(0).toDouble();
+            init_location_list[line.at(0)].pos_y = strVal.at(1).toDouble();
+            init_location_list[line.at(0)].pos_z = strVal.at(2).toDouble();
+            init_location_list[line.at(0)].ori_x = strVal.at(3).toDouble();
+            init_location_list[line.at(0)].ori_y = strVal.at(4).toDouble();
+            init_location_list[line.at(0)].ori_z = strVal.at(5).toDouble();
+            init_location_list[line.at(0)].ori_w = strVal.at(6).toDouble();
+            ui->comboBox_initLocation->addItem(line.at(0));
+        }
+        file.close();
+    }
 
 }
 
@@ -233,6 +272,15 @@ void SubWindow_MakeRoute::on_pushButton_recordRoute_toggled(bool checked)
 {
     if(checked) //start
     {
+        //check if startup app already
+        if(!ui->pushButton_StartRoute->isChecked())
+        {
+            QMessageBox::warning(this,"Warnig","Please startup make route appli first!");
+            ui->pushButton_recordRoute->blockSignals(true);
+            ui->pushButton_recordRoute->setChecked(false);
+            ui->pushButton_recordRoute->blockSignals(false);
+            return;
+        }
         //Check if same location
         if(ui->comboBox_from->currentText() == ui->comboBox_routeTo->currentText())
         {
@@ -506,5 +554,13 @@ void SubWindow_MakeRoute::on_pushButton_withRule_toggled(bool checked)
         rules_list.append(rule);
         ui->pushButton_withRule->setText("Press to Enable Rules");
     }
+}
+
+
+
+void SubWindow_MakeRoute::on_comboBox_initLocation_currentTextChanged(const QString &arg1)
+{
+    init_pose = init_location_list[arg1];
+
 }
 
