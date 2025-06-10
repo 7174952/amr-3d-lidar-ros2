@@ -10,7 +10,7 @@ ublox_gps_node:
 
     # 串口参数（用于接收差分和输出UBX）
     uart1:
-      baudrate: 115200 #230400 #38400
+      baudrate: 38400 #115200 #230400 #38400
       in: 4       # RTCM3 input
       out: 1      # UBX output
 
@@ -25,7 +25,7 @@ ublox_gps_node:
       all: false
 
     publish:
-      all: true
+      all: false
       aid:
         hui: false
       nav:
@@ -33,7 +33,7 @@ ublox_gps_node:
         relocef: true
         relposned: true
       rxm:
-        rtcm: true
+        rtcm: false
 
     fix_mode: auto
     dr_limit: 0
