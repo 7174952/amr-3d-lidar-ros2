@@ -6,6 +6,7 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <tf2_ros/transform_broadcaster.h>
 #include <geometry_msgs/msg/transform_stamped.hpp>
+#include <std_msgs/msg/bool.hpp>
 
 class OdomSelector : public rclcpp::Node
 {
@@ -32,9 +33,13 @@ public:
         sub_gps_ = this->create_subscription<nav_msgs::msg::Odometry>(
             "/odometry/gps", 10,
             std::bind(&OdomSelector::gpsCallback, this, std::placeholders::_1));
+        sub_start_turn_round_ = this->create_subscription<std_msgs::msg::Bool>(
+            "/start_turn_round",10,
+            std::bind(&OdomSelector::startTurnRoundCallback, this, std::placeholders::_1));
 
         // 发布
         pub_odom_ = this->create_publisher<nav_msgs::msg::Odometry>("/odom", 10);
+        initialpose_pub_ = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>("/initialpose", 8);
 
         RCLCPP_INFO(this->get_logger(), "✅ Odom Selector started.");
 
@@ -44,8 +49,10 @@ private:
     // 订阅者和发布者
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr sub_hdl_;
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr sub_gps_;
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr sub_start_turn_round_;
 
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_odom_;
+    rclcpp::Publisher<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr initialpose_pub_;
 
     // 最新消息存储
     nav_msgs::msg::Odometry selected_msg;
@@ -66,8 +73,18 @@ private:
     int gps_good_cnt_ = 0;
     const int gps_good_cnt_threshold_ = 50; // 例如10帧=1秒
 
+    bool is_start_turn_round = false;
+    nav_msgs::msg::Odometry lidar_yaw;
+
+
+    void startTurnRoundCallback(const std_msgs::msg::Bool::SharedPtr msg)
+    {
+        is_start_turn_round = msg->data;
+    }
+
     void hdlCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
     {
+        lidar_yaw = *msg;
         if(enable_gnss && use_gps_)
             return;
 
@@ -107,11 +124,27 @@ private:
             {
                 use_gps_ = false;
                 RCLCPP_INFO(this->get_logger(), "GPS协方差过大，回退到激光里程计！");
+
+                //Reinit robot pose by gnss datas
+                geometry_msgs::msg::PoseWithCovarianceStamped initPose_msg;
+                initPose_msg.pose.pose.position = last_gps_msg_->pose.pose.position;
+                tf2::Quaternion q;
+                q.setRPY(0, 0, last_yaw);
+                q.normalize();
+                initPose_msg.pose.pose.orientation = tf2::toMsg(q);
+                initialpose_pub_->publish(initPose_msg);
+                RCLCPP_INFO(this->get_logger(), "Switch to lidar and init Robot pose");
+
             }
         }
 
-        // 使用当前策略
-        if (use_gps_ && prev_gps_msg_)
+        if(is_start_turn_round) //起点终点时借用lidar的方向数据判断方向
+        {
+            selected_msg = *last_gps_msg_;
+            selected_msg.pose.pose.orientation = lidar_yaw.pose.pose.orientation;
+            publishOdom();
+        }
+        else if(use_gps_ && prev_gps_msg_)   // 使用当前策略
         {
             selected_msg = *last_gps_msg_;
 
@@ -132,15 +165,6 @@ private:
             {
                 yaw = last_yaw;
             }
-
-            //static transform gps->base_link
-            double x_raw = selected_msg.pose.pose.position.x;
-            double y_raw = selected_msg.pose.pose.position.y;
-            double z_raw = selected_msg.pose.pose.position.z;
-
-            selected_msg.pose.pose.position.x = x_raw;
-            selected_msg.pose.pose.position.y = y_raw;
-            selected_msg.pose.pose.position.z = z_raw;
 
             //
             tf2::Quaternion q;
