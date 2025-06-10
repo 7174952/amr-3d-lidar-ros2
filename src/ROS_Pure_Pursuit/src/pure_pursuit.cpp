@@ -40,7 +40,8 @@ public:
     template<typename T1, typename T2>
     double distance(const T1 &pt1, const T2 &pt2)
     {
-        return sqrt(pow(pt1.x - pt2.x, 2) + pow(pt1.y - pt2.y, 2) + pow(pt1.z - pt2.z, 2));
+        // return sqrt(pow(pt1.x - pt2.x, 2) + pow(pt1.y - pt2.y, 2) + pow(pt1.z - pt2.z, 2));
+        return sqrt(pow(pt1.x - pt2.x, 2) + pow(pt1.y - pt2.y, 2));
     }
 
 private:
@@ -60,11 +61,12 @@ private:
 
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr sub_odom_;
     rclcpp::Subscription<nav_msgs::msg::Path>::SharedPtr sub_path_;
-    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr sub_odom_limit_;
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr pub_vel_;
     rclcpp::Publisher<ackermann_msgs::msg::AckermannDriveStamped>::SharedPtr pub_acker_;
     rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr pub_marker_;
     rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr pub_goal_reached_;
+    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr pub_start_turn_round_;
+
     rclcpp::Service<std_srvs::srv::Empty>::SharedPtr reset_path_srv;
 
     tf2_ros::Buffer tf_buffer_;
@@ -138,6 +140,7 @@ PurePursuit::PurePursuit() : Node("pure_pursuit"), tf_buffer_(this->get_clock())
     pub_acker_ = this->create_publisher<ackermann_msgs::msg::AckermannDriveStamped>("cmd_acker", 10);
     pub_marker_ = this->create_publisher<visualization_msgs::msg::Marker>("lookahead", 10);
     pub_goal_reached_ = this->create_publisher<std_msgs::msg::Bool>("/reached_goal", 10);
+    pub_start_turn_round_ = this->create_publisher<std_msgs::msg::Bool>("/start_turn_round",10);
 
     // 创建服务
     reset_path_srv = this->create_service<std_srvs::srv::Empty>("reset_path", std::bind(&PurePursuit::reset_path_callback, this, std::placeholders::_1, std::placeholders::_2));
@@ -161,6 +164,10 @@ void PurePursuit::cmd_generator(const nav_msgs::msg::Odometry::SharedPtr odom_ms
             if (init_orient_reached == false)
             {
                 idx_ = 0;
+                std_msgs::msg::Bool start_turn_round;
+                start_turn_round.data = true;
+                pub_start_turn_round_->publish(start_turn_round);
+
             }
             else
             {
@@ -198,6 +205,11 @@ void PurePursuit::cmd_generator(const nav_msgs::msg::Odometry::SharedPtr odom_ms
                     (goal_reached_ && !orient_reached))
                 {
                     goal_reached_ = true;
+
+                    std_msgs::msg::Bool start_turn_round;
+                    start_turn_round.data = true;
+                    pub_start_turn_round_->publish(start_turn_round);
+
                     geometry_msgs::msg::Pose goal_pose = path_.poses.back().pose;
                     goal_orientation_control(goal_pose, &orient_reached);
                     if (orient_reached)
@@ -207,6 +219,11 @@ void PurePursuit::cmd_generator(const nav_msgs::msg::Odometry::SharedPtr odom_ms
                         std_msgs::msg::Bool is_reached_goal;
                         is_reached_goal.data = true;
                         pub_goal_reached_->publish(is_reached_goal);
+
+                        std_msgs::msg::Bool start_turn_round;
+                        start_turn_round.data = false;
+                        pub_start_turn_round_->publish(start_turn_round);
+
                     }
                     else
                     {
@@ -260,6 +277,11 @@ void PurePursuit::cmd_generator(const nav_msgs::msg::Odometry::SharedPtr odom_ms
                         if (this->get_clock()->now().seconds() - wait_time > 3.0)
                         {
                             init_orient_reached = true;
+
+                            std_msgs::msg::Bool start_turn_round;
+                            start_turn_round.data = false;
+                            pub_start_turn_round_->publish(start_turn_round);
+
                             set_wait = false;
                             v_ = 0;
                         }
@@ -307,6 +329,7 @@ void PurePursuit::cmd_generator(const nav_msgs::msg::Odometry::SharedPtr odom_ms
                     std_msgs::msg::Bool is_reached_goal;
                     is_reached_goal.data = false;
                     pub_goal_reached_->publish(is_reached_goal);
+
                 }
                 else
                 {
