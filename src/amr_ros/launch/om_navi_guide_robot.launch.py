@@ -135,7 +135,7 @@ def generate_launch_description():
 
     # 3D LiDAR visualization launch (Assuming converted to .launch.py)
     lidar_livox_launch = TimerAction(
-        period=10.0,
+        period=15.0,
         actions=[
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(PathJoinSubstitution(

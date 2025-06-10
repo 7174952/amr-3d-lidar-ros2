@@ -22,7 +22,7 @@ def generate_launch_description():
 
     # 引用子launch文件
     livox_driver2_launch = TimerAction(
-        period=10.0,  # 延时5秒
+        period=15.0,  # 延时5秒
         actions=[
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
