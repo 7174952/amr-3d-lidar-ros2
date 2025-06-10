@@ -33,6 +33,7 @@ class RealsenseYoloNode(Node):
         self.model = torch.hub.load('ultralytics/yolov5', 'yolov5s')  # 可替换为 yolov5m/l/x
         if torch.cuda.is_available():
             self.model.cuda()
+            print("use cuda")
 
         # 设置定时器：10Hz
         self.timer = self.create_timer(0.1, self.timer_callback)
